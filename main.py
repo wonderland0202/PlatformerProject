@@ -135,10 +135,14 @@ def openGamePlay(level):
     elif playerLevel == 2:
         bgImage, playerCharacter, levelData = levelTwoData()
 
+    xValPixelated = 0
+    yValPixelated = 0
+    for i in range(len(levelData)):
+        xValPixelated += 1
 
-    print(levelData)
-    #for i in range(len(levelData)):
-
+        if xValPixelated > 146:
+            xValPixelated = 0
+            yValPixelated += 1
 
     while gameLoopRunning:
         for event in pygame.event.get():
