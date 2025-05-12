@@ -13,33 +13,39 @@ pygame.display.set_caption("Platformer")
 clock = pygame.time.Clock()
 FPS = 144
 gameState = "startScreen"
+font = pygame.font.SysFont("Consolas", 24)
 
 
 running = True
 
 #Player's current level
 with open("Player-Data\CurrentPlayerLevel.txt") as level:
-  playerLevel = int(level.read())
+    playerLevel = int(level.read())
+
+with open("Player-Data\CurrentPlayerScreen.txt") as currScreen:
+    playerScreen = int(currScreen.read())
 
 def openStartScreen():
     global WIDTH, HEIGHT, screen, clock, FPS, gameState, pygame
-    continueButtonFont = pygame.font.SysFont(None, 24)
-    levelsButtonFont = pygame.font.SysFont(None, 12)
-    quitButtonFont = pygame.font.SysFont(None,10)
     startScreenRunning = True
     menuIndex = 0
 
-    menuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5, "CONTINUE", continueButtonFont) #h: 1/3
-    menuLevelsButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7, "LEVELS", levelsButtonFont) #h: 7/12
-    menuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8, "QUIT", quitButtonFont) #h: 9 / 12
+    menuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5, "Images\Buttons\placeholderButton.png", "Images\Buttons\placeholderButton-Selected.png") #h: 1/3
+    menuLevelsButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7, "Images\Buttons\placeholderButton.png", "Images\Buttons\placeholderButton-Selected.png") #h: 7/12
+    menuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8, "Images\Buttons\placeholderButton.png", "Images\Buttons\placeholderButton-Selected.png") #h: 9 / 12
+    menuSettingsButton = MenuButton(12 * WIDTH / 13, HEIGHT / 13, WIDTH / 10, WIDTH / 10, "Images\Buttons\placeholderButton.png","Images\Buttons\placeholderButton-Selected.png")
+
+    # So menuContinueButton starts highlighted
+    menuContinueButton.highlight()
 
     buttonGroup = pygame.sprite.Group()
 
     buttonGroup.add(menuContinueButton)
     buttonGroup.add(menuLevelsButton)
     buttonGroup.add(menuQuitButton)
+    buttonGroup.add(menuSettingsButton)
 
-    bgMenuImage = pygame.image.load("Images/Backgrounds/BGPH.png").convert_alpha()
+    bgMenuImage = pygame.image.load("Images\Backgrounds\BGPH.png").convert_alpha()
     bgMenuImage = pygame.transform.scale(bgMenuImage, (WIDTH, HEIGHT))
 
     while startScreenRunning:
@@ -59,37 +65,54 @@ def openStartScreen():
                 if event.key == pygame.K_DOWN:
                     if menuIndex == 0:
                         menuIndex += 1
+                        menuSettingsButton.unhighlight()
+                        menuContinueButton.highlight()
+
+                    elif menuIndex == 1:
+                        menuIndex += 1
                         menuContinueButton.unhighlight()
                         menuLevelsButton.highlight()
 
-                    elif menuIndex == 1:
+                    elif menuIndex == 2:
                         menuIndex += 1
                         menuLevelsButton.unhighlight()
                         menuQuitButton.highlight()
 
                 if event.key == pygame.K_UP:
-                    if menuIndex == 2:
+                    if menuIndex == 3:
                         menuIndex -= 1
                         menuQuitButton.unhighlight()
                         menuLevelsButton.highlight()
 
-                    elif menuIndex == 1:
+                    elif menuIndex == 2:
                         menuIndex -= 1
                         menuLevelsButton.unhighlight()
                         menuContinueButton.highlight()
+
+                    elif menuIndex == 1:
+                        menuIndex -= 1
+                        menuContinueButton.unhighlight()
+                        menuSettingsButton.highlight()
                 #---
 
                 # Menu Selection Interactions
                 if event.key == pygame.K_SPACE:
                     if menuIndex == 0:
+                        gameState = "settingsMenu"
+                        startScreenRunning = False
+                        continue
+
+                    elif menuIndex == 1:
                         gameState = "gamePlay"
                         startScreenRunning = False
                         continue
-                    elif menuIndex == 1:
+
+                    elif menuIndex == 2:
                         gameState = "levelsMenu"
                         startScreenRunning = False
                         continue
-                    elif menuIndex == 2:
+
+                    elif menuIndex == 3:
                         gameState = "endGame"
                         startScreenRunning = False
                         continue
@@ -99,17 +122,83 @@ def openStartScreen():
 
         buttonGroup.draw(screen)
 
-
         clock.tick(FPS)
         pygame.display.update()
 
 
 def openGamePlay(level):
-    global WIDTH, HEIGHT, screen, clock, FPS, running, gameState
+    global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, font
+    gameLoopRunning = True
+
+    if playerLevel == 1:
+        bgImage, playerCharacter, levelData = levelOneData()
+    elif playerLevel == 2:
+        bgImage, playerCharacter, levelData = levelTwoData()
+
+
+    print(levelData)
+    #for i in range(len(levelData)):
+
+
+    while gameLoopRunning:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameState = "endGame"
+                gameLoopRunning = False
+                continue
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gameState = "endGame"
+                    gameLoopRunning = False
+                    continue
+
+
+        fps = int(clock.get_fps())
+        fpsText = font.render(f"FPS: {fps}", True, (255, 255, 255))
+
+        playerCharacter.update(HEIGHT)
+
+        screen.blit(bgImage, (0, 0))
+
+        screen.blit(playerCharacter.image, playerCharacter.rect)
+        screen.blit(fpsText, (WIDTH / 145, HEIGHT / 90))
+
+        clock.tick(FPS)
+        pygame.display.update()
+
+
+
+
+def levelOneData():
+    global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, playerScreen
+    bgLevel1Image = pygame.image.load("Images\Backgrounds\l1bgph.png").convert_alpha()
+    bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
+    playerCharacter = Player(10, 860, 100 / 3, 50, "Images\Player\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
+    levelData = makeLevel("1", str(playerScreen))
+    return bgLevel1Image, playerCharacter, levelData
+
+def levelTwoData():
+    global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, playerScreen
+    bgLevel2Image = pygame.image.load("Images\Backgrounds\BGPH.png").convert_alpha()
+    bgLevel2Image = pygame.transform.scale(bgLevel2Image, (WIDTH, HEIGHT))
+    playerCharacter = Player(10, 860, 20, 50, "Images\Player\placeholderPlayer", 20, 2, 5, 50, 1, 30, 500, 0.9)
+    levelData = makeLevel("2", str(playerScreen))
+    return bgLevel2Image, playerCharacter, levelData
+
+def makeLevel(levelNum, screenNum):
+    #with open(f"C:nk/PycharmProjects/PlatformerGame/Levels/Level{levelNum}Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
+    #    levelData = levelToLoad.read()
+    with open(f"C:\\Users\\toink\\PycharmProjects\\PlatformerGame\\Levels\\Level1Screens\\Level1Screen1.txt") as levelToLoad:
+        levelData = levelToLoad.read()
+    return levelData
 
 def incrementLevel():
     with open("Player-Data\CurrentPlayerLevel.txt") as currLevel:
-        currLevel.write(str(int(currLevel.read())+1))
+        currLevel.write(str(int(currLevel.read()) + 1))
+
+def incrementScreen():
+    with open("Player-Data\CurrentPlayerScreen.txt") as currScreen:
+        currScreen.write(str(int(currScreen.read()) + 1))
 
 def openPauseMenu():
     global WIDTH, HEIGHT, screen, clock, FPS, running, gameState
@@ -122,10 +211,15 @@ def openLoseScreen():
 def openLevelsMenu():
     print()
 
+def openSettingsMenu():
+    print()
+
 while running:
     if gameState == "startScreen":
         openStartScreen()
     elif gameState == "gamePlay":
+        with open("Player-Data\CurrentPlayerLevel.txt") as level:
+            playerLevel = int(level.read())
         openGamePlay(playerLevel)
     elif gameState == "paused":
         openPauseMenu()
@@ -133,6 +227,8 @@ while running:
         openLoseScreen()
     elif gameState == "levelsMenu":
         openLevelsMenu()
+    elif gameState == "settingsMenu":
+        openSettingsMenu()
     elif gameState == "endGame":
         running = False
 

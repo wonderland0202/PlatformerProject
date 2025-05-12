@@ -1,7 +1,7 @@
 import pygame.sprite
 
 class MenuButton(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, text, font):
+    def __init__(self, x, y, width, height, unselectedImage, selectedImage):
         super().__init__()
 
         self.x = x
@@ -13,24 +13,19 @@ class MenuButton(pygame.sprite.Sprite):
         self.textPos = (self.width / 2, self.height / 2)
         self.textColour = (255, 255, 255)
 
-        self.bgNoHighlightColour = (255,255,255, 0.2)
-        self.bgHighlightColour = (255,255,255,1)
+        self.unselectedImage = pygame.image.load(unselectedImage).convert_alpha()
+        self.unselectedImage = pygame.transform.scale(self.unselectedImage, (self.width, self.height))
 
-        self.currColour = self.bgNoHighlightColour
+        self.selectedImage = pygame.image.load(selectedImage).convert_alpha()
+        self.selectedImage = pygame.transform.scale(self.selectedImage, (self.width, self.height))
 
-        self.text = text
-        self.font = font
-
-        self.image = pygame.Surface((width, height))
-        self.image.fill(self.currColour)
+        self.image = self.unselectedImage
 
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
     def highlight(self):
-        self.currColour = self.bgHighlightColour
-        self.image.fill(self.currColour)
+        self.image = self.selectedImage
 
     def unhighlight(self):
-        self.currColour = self.bgNoHighlightColour
-        self.image.fill(self.currColour)
+        self.image = self.unselectedImage
