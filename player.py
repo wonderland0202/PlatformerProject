@@ -39,6 +39,8 @@ class Player(pygame.sprite.Sprite):
 
         self.onGround = False
 
+        self.lastPos = (self.rect.x, self.rect.y)
+
 
     def update(self, screenHeight):
         keys = pygame.key.get_pressed()
@@ -48,6 +50,9 @@ class Player(pygame.sprite.Sprite):
         if self.rect.y - self.height > screenHeight:
             self.rect.y = screenHeight - self.height
             self.onGround = True
+
+        self.x = self.rect.x
+        self.y = self.rect.y
         self.move(keys)
 
     def move(self, keys):
@@ -59,3 +64,13 @@ class Player(pygame.sprite.Sprite):
             if self.onGround:
                 self.speedY = -1 * self.jumpHeight
                 self.onGround = False
+
+    def doCollision(self, tileGroup, lastPos):
+        for tile in tileGroup:
+            collided = pygame.sprite.spritecollide(self, tileGroup, False)
+            if collided:
+                self.rect = self.lastPos
+                break
+
+    def holdPos(self):
+        self.lastPos = (self.x, self.y)

@@ -10,6 +10,7 @@ class collisionObject(pygame.sprite.Sprite):
         self.width = width
         self.height = height
 
+
         self.image = pygame.image.load(image).convert_alpha()
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
 

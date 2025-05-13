@@ -131,50 +131,58 @@ def openGamePlay(level):
     global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, font
     gameLoopRunning = True
 
-    if playerLevel == 1:
+    if level == 1:
         bgImage, playerCharacter, levelData = levelOneData()
-    elif playerLevel == 2:
+        print(level)
+    elif level == 2:
         bgImage, playerCharacter, levelData = levelTwoData()
+        print(level)
 
+    print(levelData)
     xValPixelated = 0
     yValPixelated = 0
     gameTileGroup = pygame.sprite.Group()
     for i in range(len(levelData)):
+        collisionVal = True
         if levelData[i] == " ":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/EmptyTile.png", False)
+            objectIdentity = "Levels/LevelMakeup/EmptyTile.png"
+            collisionVal = False
         elif levelData[i] == "W":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/LeftWallLine.png", True)
+            objectIdentity = "Levels/LevelMakeup/LeftWallLine.png"
         elif levelData[i] == "F":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/FloorLine.png", True)
+            objectIdentity = "Levels/LevelMakeup/FloorLine.png"
         elif levelData[i] == "Q":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/RightWallLine.png", True)
+            objectIdentity = "Levels/LevelMakeup/RightWallLine.png"
         elif levelData[i] == "A":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/InnerBuilding.png", True)
+            objectIdentity = "Levels/LevelMakeup/InnerBuilding.png"
         elif levelData[i] == "C":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/CeilingLine.png", True)
+            objectIdentity = "Levels/LevelMakeup/CeilingLine.png"
         elif levelData[i] == "V":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/WallToFloor-Up.png", True)
+            objectIdentity = "Levels/LevelMakeup/WallToFloor-Up.png"
         elif levelData[i] == "M":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/FloorToWall-Down.png", True)
+            objectIdentity = "Levels/LevelMakeup/FloorToWall-Down.png"
         elif levelData[i] == "N":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/FloorToWall-Up.png", True)
+            objectIdentity = "Levels/LevelMakeup/FloorToWall-Up.png"
         elif levelData[i] == "P":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/CeilingToWall-Up.png", True)
+            objectIdentity = "Levels/LevelMakeup/CeilingToWall-Up.png"
         elif levelData[i] == "I":
-            newGameTile = collisionObject(xValPixelated * WIDTH / 10, yValPixelated * HEIGHT / 10, WIDTH / 10, HEIGHT / 10, "Levels/LevelMakeup/WallToCeiling-Up.png", True)
+            objectIdentity = "Levels/LevelMakeup/WallToCeiling-Up.png"
+        elif levelData[i] == "B":
+            objectIdentity = "Levels/LevelMakeup/FacingUpFan.png"
 
-
+        newGameTile = collisionObject(xValPixelated * WIDTH / 14, yValPixelated * HEIGHT / 9, WIDTH / 14, HEIGHT / 9,objectIdentity, collisionVal)
         print(f"Done: {i}")
 
         gameTileGroup.add(newGameTile)
 
         if levelData[i] != 'O':
             xValPixelated += 1
-        if xValPixelated > 146:
+        if xValPixelated > 14:
             xValPixelated = 0
             yValPixelated += 1
 
     while gameLoopRunning:
+        Player.holdPos(Player)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gameState = "endGame"
@@ -194,6 +202,7 @@ def openGamePlay(level):
         fpsText = font.render(f"FPS: {fps}", True, (255, 255, 255))
 
         playerCharacter.update(HEIGHT)
+        playerCharacter.doCollision(gameTileGroup)
 
         screen.blit(bgImage, (0, 0))
 
@@ -212,7 +221,7 @@ def levelOneData():
     global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, playerScreen
     bgLevel1Image = pygame.image.load("Images\Backgrounds\l1bgph.png").convert_alpha()
     bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
-    playerCharacter = Player(10, 860, 100 / 3, 50, "Images\Player\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
+    playerCharacter = Player(WIDTH / 14, 8 * HEIGHT / 9, 100 / 3, 50, "Images\Player\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
     levelData = makeLevel("1", str(playerScreen))
     return bgLevel1Image, playerCharacter, levelData
 
@@ -225,9 +234,7 @@ def levelTwoData():
     return bgLevel2Image, playerCharacter, levelData
 
 def makeLevel(levelNum, screenNum):
-    #with open(f"C:nk/PycharmProjects/PlatformerGame/Levels/Level{levelNum}Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
-    #    levelData = levelToLoad.read()
-    with open("Levels/Level1Screens/Level1Screen1.txt") as levelToLoad:
+    with open(f"Levels/Level1Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
         levelData = levelToLoad.read()
     return levelData
 
