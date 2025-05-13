@@ -1,4 +1,6 @@
 import pygame.sprite
+from pygame.sprite import groupcollide
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image, jumpHeight, jumpNum, speed, dashDist, dashNum, dashCooldown, climbLen, gravity):
@@ -39,14 +41,19 @@ class Player(pygame.sprite.Sprite):
 
         self.onGround = False
 
-        self.lastPos = (self.rect.x, self.rect.y)
+        self.lastPos = self.rect.center
+
+        self.origPos = self.rect.center
+
+        self.tileOffset = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
 
 
-    def update(self, screenHeight):
+    def update(self, screenHeight, screenWidth):
         keys = pygame.key.get_pressed()
         self.speedY += self.gravity
-        if self.onGround == False:
-            self.rect.y += self.speedY
+        #if not self.onGround:
+        #    self.rect.y += self.speedY
+        self.rect.y += self.speedY
         if self.rect.y - self.height > screenHeight:
             self.rect.y = screenHeight - self.height
             self.onGround = True
@@ -54,6 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.x = self.rect.x
         self.y = self.rect.y
         self.move(keys)
+        self.boundCheck(screenWidth, screenHeight)
 
     def move(self, keys):
         if keys[pygame.K_d]:
@@ -64,13 +72,34 @@ class Player(pygame.sprite.Sprite):
             if self.onGround:
                 self.speedY = -1 * self.jumpHeight
                 self.onGround = False
+        if keys[pygame.K_r]:
+            self.rect.center = self.origPos
+            print("reset")
 
-    def doCollision(self, tileGroup, lastPos):
-        for tile in tileGroup:
-            collided = pygame.sprite.spritecollide(self, tileGroup, False)
-            if collided:
-                self.rect = self.lastPos
-                break
+    def doCollision(self, tileGroup, playerCharacter):
+        collided = pygame.sprite.spritecollide(playerCharacter, tileGroup, False)
+        if collided:
+            collider = pygame.sprite.spritecollideany(playerCharacter, tileGroup)
+            colliderLetter = collider.letterValue
+            if colliderLetter == "F":
+                self.rect.bottom = collider.rect.top
+                self.onGround = True
+            elif colliderLetter == "W":
+                self.rect.right = collider.rect.left
+            elif colliderLetter == "Q":
+                self.rect.left = collider.rect.right
+            elif colliderLetter == "C":
+                self.rect.top = collider.rect.bottom
+            elif colliderLetter == "A":
+                self.rect.bottom = collider.rect.top - collider.height
 
     def holdPos(self):
-        self.lastPos = (self.x, self.y)
+        self.lastPos = self.rect.center
+
+    def boundCheck(self, screenWidth, screenHeight):
+        if self.rect.right > screenWidth:
+            self.rect.right = screenWidth
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.bottom > screenHeight:
+            self.rect.bottom = screenHeight

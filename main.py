@@ -132,16 +132,16 @@ def openGamePlay(level):
     gameLoopRunning = True
 
     if level == 1:
-        bgImage, playerCharacter, levelData = levelOneData()
-        print(level)
+        bgImage, playerCharacter, levelData, playerGroup = levelOneData()
+
     elif level == 2:
         bgImage, playerCharacter, levelData = levelTwoData()
-        print(level)
 
-    print(levelData)
+
     xValPixelated = 0
     yValPixelated = 0
     gameTileGroup = pygame.sprite.Group()
+    collisionObjects = pygame.sprite.Group()
     for i in range(len(levelData)):
         collisionVal = True
         if levelData[i] == " ":
@@ -170,10 +170,12 @@ def openGamePlay(level):
         elif levelData[i] == "B":
             objectIdentity = "Levels/LevelMakeup/FacingUpFan.png"
 
-        newGameTile = collisionObject(xValPixelated * WIDTH / 14, yValPixelated * HEIGHT / 9, WIDTH / 14, HEIGHT / 9,objectIdentity, collisionVal)
+        newGameTile = collisionObject(xValPixelated * WIDTH / 14, yValPixelated * HEIGHT / 9, WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, levelData[i])
         print(f"Done: {i}")
 
         gameTileGroup.add(newGameTile)
+        if collisionVal:
+            collisionObjects.add(newGameTile)
 
         if levelData[i] != 'O':
             xValPixelated += 1
@@ -182,7 +184,7 @@ def openGamePlay(level):
             yValPixelated += 1
 
     while gameLoopRunning:
-        Player.holdPos(Player)
+        playerCharacter.holdPos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 gameState = "endGame"
@@ -194,15 +196,11 @@ def openGamePlay(level):
                     gameLoopRunning = False
                     continue
 
-
-
-
-
         fps = int(clock.get_fps())
-        fpsText = font.render(f"FPS: {fps}", True, (255, 255, 255))
+        fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
 
-        playerCharacter.update(HEIGHT)
-        playerCharacter.doCollision(gameTileGroup)
+        playerCharacter.update(HEIGHT, WIDTH)
+        playerCharacter.doCollision(collisionObjects, playerCharacter)
 
         screen.blit(bgImage, (0, 0))
 
@@ -219,11 +217,13 @@ def openGamePlay(level):
 
 def levelOneData():
     global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, playerScreen
+    playerGroup = pygame.sprite.Group()
     bgLevel1Image = pygame.image.load("Images\Backgrounds\l1bgph.png").convert_alpha()
     bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
-    playerCharacter = Player(WIDTH / 14, 8 * HEIGHT / 9, 100 / 3, 50, "Images\Player\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
+    playerCharacter = Player(WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50, "Images\Player\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
+    playerGroup.add(playerCharacter)
     levelData = makeLevel("1", str(playerScreen))
-    return bgLevel1Image, playerCharacter, levelData
+    return bgLevel1Image, playerCharacter, levelData, playerGroup
 
 def levelTwoData():
     global WIDTH, HEIGHT, screen, clock, FPS, running, gameState, playerScreen
