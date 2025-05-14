@@ -1,3 +1,5 @@
+from tty import ISPEED
+
 import pygame.sprite
 from pygame.sprite import groupcollide
 
@@ -25,7 +27,9 @@ class Player(pygame.sprite.Sprite):
         self.jumpHeight = jumpHeight
         self.jumpNum = jumpNum
 
-        self.speed = speed
+        self.speed = 0
+        self.lSpeed = speed * -1
+        self.rSpeed = speed
 
         self.gravity = gravity
 
@@ -48,7 +52,7 @@ class Player(pygame.sprite.Sprite):
         self.tileOffset = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
 
 
-    def update(self, screenHeight, screenWidth):
+    def update(self, screenHeight, screenWidth, tileGroup, playerCharacter):
         keys = pygame.key.get_pressed()
         self.speedY += self.gravity
         #if not self.onGround:
@@ -60,14 +64,18 @@ class Player(pygame.sprite.Sprite):
 
         self.x = self.rect.x
         self.y = self.rect.y
-        self.move(keys)
+
+        self.rect.x += self.speed
+        self.move(keys, tileGroup, playerCharacter)
         self.boundCheck(screenWidth, screenHeight)
 
     def move(self, keys):
         if keys[pygame.K_d]:
-            self.rect.x += self.speed
+            self.speed = self.rSpeed
+        else:
+            self.rSpeed = 0
         if keys[pygame.K_a]:
-            self.rect.x -= self.speed
+            self.speed = self.lSpeed
         if keys[pygame.K_SPACE]:
             if self.onGround:
                 self.speedY = -1 * self.jumpHeight
@@ -84,6 +92,7 @@ class Player(pygame.sprite.Sprite):
             if colliderLetter == "F":
                 self.rect.bottom = collider.rect.top
                 self.onGround = True
+            '''
             elif colliderLetter == "W":
                 self.rect.right = collider.rect.left
             elif colliderLetter == "Q":
@@ -92,6 +101,7 @@ class Player(pygame.sprite.Sprite):
                 self.rect.top = collider.rect.bottom
             elif colliderLetter == "A":
                 self.rect.bottom = collider.rect.top - collider.height
+            '''
 
     def holdPos(self):
         self.lastPos = self.rect.center

@@ -199,7 +199,7 @@ def openGamePlay(level):
         fps = int(clock.get_fps())
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
 
-        playerCharacter.update(HEIGHT, WIDTH)
+        playerCharacter.update(HEIGHT, WIDTH, gameTileGroup, playerCharacter)
         playerCharacter.doCollision(collisionObjects, playerCharacter)
 
         screen.blit(bgImage, (0, 0))
