@@ -3,12 +3,13 @@ import os
 
 from player import Player
 from menuButton import MenuButton
-from gameObject import collisionObject
+from collisionObject import collisionObject
 
 pygame.init()
 
 # Global constants
-WIDTH, HEIGHT = 1450, 900
+scrSize = pygame.display.Info()
+WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 clock = pygame.time.Clock()
@@ -118,9 +119,15 @@ def openGamePlay(level):
     gameTileGroup = pygame.sprite.Group()
     collisionObjects = pygame.sprite.Group()
 
+    fanAirGroup = pygame.sprite.Group()
+    fanBaseIndices = []
+
     for i in range(len(levelData)):
         collisionVal = True
         char = levelData[i]
+        x = xValPixelated * WIDTH / 14
+        y = yValPixelated * HEIGHT / 9
+
         objectIdentity = {
             " ": "Levels/LevelMakeup/EmptyTile.png",
             "W": "Levels/LevelMakeup/LeftWallLine.png",
@@ -139,11 +146,18 @@ def openGamePlay(level):
         if char == " ":
             collisionVal = False
 
-        newGameTile = collisionObject(xValPixelated * WIDTH / 14, yValPixelated * HEIGHT / 9,
-                                      WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, char)
+        newGameTile = collisionObject(x, y, WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, char)
         gameTileGroup.add(newGameTile)
         if collisionVal:
             collisionObjects.add(newGameTile)
+
+        if char == "B":
+            for offset in range(1, 4):  # 3 tiles above
+                air_y = y - offset * (HEIGHT / 9)
+                fanAir = collisionObject(x, air_y, WIDTH / 14, HEIGHT / 9, "Levels/LevelMakeup/FanAir.png", False,
+                                         "fanAir")
+                fanAirGroup.add(fanAir)
+                gameTileGroup.add(fanAir)
 
         if char != 'O':
             xValPixelated += 1
@@ -166,7 +180,7 @@ def openGamePlay(level):
         fps = int(clock.get_fps())
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
 
-        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, playerCharacter)
+        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, playerCharacter, fanAirGroup)
 
         screen.blit(bgImage, (0, 0))
         gameTileGroup.draw(screen)
@@ -182,7 +196,7 @@ def levelOneData():
     bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1bgph.png").convert_alpha()
     bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
     playerCharacter = Player(WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
-                             "Images\\Player\\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
+                             "Images\\Player\\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9, 5)
     playerGroup.add(playerCharacter)
     levelData = makeLevel("1", str(playerScreen))
     return bgLevel1Image, playerCharacter, levelData, playerGroup

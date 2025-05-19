@@ -1,7 +1,7 @@
 import pygame.sprite
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, image, jumpHeight, jumpNum, speed, dashDist, dashNum, dashCooldown, climbLen, gravity):
+    def __init__(self, x, y, width, height, image, jumpHeight, jumpNum, speed, dashDist, dashNum, dashCooldown, climbLen, gravity, speedBoost):
         super().__init__()
 
         # Position
@@ -21,6 +21,8 @@ class Player(pygame.sprite.Sprite):
         self.speed = 0
         self.lSpeed = speed * -1
         self.rSpeed = speed
+        self.originalSpeed = speed
+        self.speedBoost = speedBoost
         self.gravity = gravity
         self.dashDist = dashDist
         self.dashNum = dashNum
@@ -32,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.origPos = self.rect.center
         self.tileOffset = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
 
-    def update(self, screenHeight, screenWidth, tileGroup, playerCharacter):
+    def update(self, screenHeight, screenWidth, tileGroup, playerCharacter, fanAirGroup):
         keys = pygame.key.get_pressed()
 
         # Horizontal movement
@@ -48,6 +50,11 @@ class Player(pygame.sprite.Sprite):
         # Input and position update
         self.move(keys)
         self.boundCheck(screenWidth, screenHeight)
+        # FanAir push
+        fanCollisions = pygame.sprite.spritecollide(playerCharacter, fanAirGroup, False)
+        if fanCollisions:
+            self.speedY = -self.jumpHeight / 2  # Adjust push strength as desired
+
         self.x, self.y = self.rect.topleft
 
     def move(self, keys):
@@ -57,6 +64,13 @@ class Player(pygame.sprite.Sprite):
             self.speed = self.lSpeed
         else:
             self.speed = 0
+
+        if keys[pygame.K_LSHIFT]:
+            self.rSpeed = self.speedBoost + self.originalSpeed
+            self.lSpeed = self.speedBoost * -1 - self.originalSpeed
+        else:
+            self.rSpeed = self.originalSpeed
+            self.lSpeed = self.originalSpeed * -1
 
         if keys[pygame.K_SPACE]:
             if self.onGround:
