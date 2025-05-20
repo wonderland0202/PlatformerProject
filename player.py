@@ -35,6 +35,7 @@ class Player(pygame.sprite.Sprite):
         self.tileOffset = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
         self.currLevel = 1
         self.currScreen = 1
+        self.transitionVal = None
 
     def update(self, screenHeight, screenWidth, tileGroup, playerCharacter, fanAirGroup):
         keys = pygame.key.get_pressed()
@@ -104,20 +105,21 @@ class Player(pygame.sprite.Sprite):
                     self.speedY = 0
 
     def boundCheck(self, screenWidth, screenHeight):
+        self.transitionVal = self.transitionVal
         if self.rect.right > screenWidth - 0.1:
             self.rect.left = 2
-            return "SCREENUP"
+            self.transitionVal = "SCREENUP"
 
         if self.rect.left < 0:
             self.rect.right = screenWidth - 2
-            return "SCREENDOWN"
+            self.transitionVal = "SCREENDOWN"
 
         if self.rect.bottom > screenHeight:
             self.rect.bottom = screenHeight
 
         if self.rect.top < 0:
-            return "LEVELUP"
+            self.transitionVal = "LEVELUP"
 
-        return None
+        return self.transitionVal
 
 
