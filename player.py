@@ -103,15 +103,18 @@ class Player(pygame.sprite.Sprite):
                     self.rect.top = collider.rect.bottom
                     self.speedY = 0
 
-    def holdPos(self):
-        self.lastPos = self.rect.center
-
     def boundCheck(self, screenWidth, screenHeight):
-        if self.rect.right > screenWidth:
+        if self.rect.right > screenWidth-0.1:
             print("hit right wall")
-            self.rect.left = 0
+            self.rect.left = 2
             self.currScreen += 1
+            return "SCREENUP"
         if self.rect.left < 0:
-            self.rect.left = 0
+            self.rect.right = screenWidth - 2
+            self.currScreen -= 1
+            return "SCREENDOWN"
         if self.rect.bottom > screenHeight:
             self.rect.bottom = screenHeight
+        if self.rect.top < 0:
+            self.currLevel += 1
+            return "LEVELUP"

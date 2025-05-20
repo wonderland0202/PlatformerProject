@@ -18,6 +18,7 @@ FPS = 144
 gameState = "startScreen"
 font = pygame.font.SysFont("Consolas", 24)
 running = True
+runBefore = False
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -110,8 +111,49 @@ def openGamePlay(level):
     global gameState, playerScreen
     gameLoopRunning = True
 
+    playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup  = buildLevel(level)
+
+    while gameLoopRunning:
+        if playerScreen != playerCharacter.currScreen:
+            playerScreen = playerCharacter.currScreen
+            playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                with open("Player-Data/CurrentPlayerScreen.txt") as screenNumHolder:
+                    screenNumHolder.write(playerCharacter.currScreen)
+                with open("Player-Data/CurrentPlayerLevel.txt") as levelNumHolder:
+                    levelNumHolder.write(playerCharacter.currLevel)
+                gameState = "endGame"
+                gameLoopRunning = False
+                continue
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                gameState = "endGame"
+                gameLoopRunning = False
+                continue
+
+        fps = int(clock.get_fps())
+        fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
+
+        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, playerCharacter, fanAirGroup)
+        screen.blit(bgImage, (0, 0))
+        gameTileGroup.draw(screen)
+        screen.blit(playerCharacter.image, playerCharacter.rect)
+        screen.blit(fpsText, (WIDTH / 145, HEIGHT / 90))
+
+
+        clock.tick(FPS)
+        pygame.display.update()
+
+
+def buildLevel(level):
+    global runBefore
     if level == 1:
-        bgImage, playerCharacter, levelData, playerGroup = levelOneData()
+        if not runBefore:
+            bgImage, playerCharacter, levelData, playerGroup = levelOneData()
+            runBefore = True
+        else:
+            levelData = levelOneData()
     elif level == 2:
         bgImage, playerCharacter, levelData = levelTwoData()
 
@@ -165,47 +207,22 @@ def openGamePlay(level):
         if xValPixelated > 14:
             xValPixelated = 0
             yValPixelated += 1
-
-    while gameLoopRunning:
-        playerCharacter.holdPos()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                with open("Player-Data/CurrentPlayerScreen.txt") as screenNumHolder:
-                    screenNumHolder.write(playerCharacter.currScreen)
-                with open("Player-Data/CurrentPlayerLevel.txt") as levelNumHolder:
-                    levelNumHolder.write(playerCharacter.currLevel)
-                gameState = "endGame"
-                gameLoopRunning = False
-                continue
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                gameState = "endGame"
-                gameLoopRunning = False
-                continue
-
-        fps = int(clock.get_fps())
-        fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
-
-        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, playerCharacter, fanAirGroup)
-        playerScreen = playerCharacter.currScreen
-        screen.blit(bgImage, (0, 0))
-        gameTileGroup.draw(screen)
-        screen.blit(playerCharacter.image, playerCharacter.rect)
-        screen.blit(fpsText, (WIDTH / 145, HEIGHT / 90))
-
-        clock.tick(FPS)
-        pygame.display.update()
-
+    return playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup
 
 def levelOneData():
-    global playerScreen
-    playerGroup = pygame.sprite.Group()
-    bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1bgph.png").convert_alpha()
-    bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
-    playerCharacter = Player(WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
-                             "Images\\Player\\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9, 5)
-    playerGroup.add(playerCharacter)
+    global playerScreen, runBefore
+    if not runBefore:
+        playerGroup = pygame.sprite.Group()
+        bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1bgph.png").convert_alpha()
+        bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
+        playerCharacter = Player(WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
+                                 "Images\\Player\\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9, 5)
+        playerGroup.add(playerCharacter)
     levelData = makeLevel("1", str(playerScreen))
-    return bgLevel1Image, playerCharacter, levelData, playerGroup
+    if not runBefore:
+        return bgLevel1Image, playerCharacter, levelData, playerGroup
+    else:
+        return levelData
 
 
 def levelTwoData():
