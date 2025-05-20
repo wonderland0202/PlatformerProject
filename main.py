@@ -10,6 +10,7 @@ pygame.init()
 # Global constants
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
+WIDTH, HEIGHT = 725, 450
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 clock = pygame.time.Clock()
@@ -106,7 +107,7 @@ def openStartScreen():
 
 
 def openGamePlay(level):
-    global gameState
+    global gameState, playerScreen
     gameLoopRunning = True
 
     if level == 1:
@@ -143,7 +144,7 @@ def openGamePlay(level):
             "B": "Levels/LevelMakeup/FacingUpFan.png"
         }.get(char, "Levels/LevelMakeup/EmptyTile.png")
 
-        if char == " ":
+        if char == " " or char == "O":
             collisionVal = False
 
         newGameTile = collisionObject(x, y, WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, char)
@@ -169,6 +170,10 @@ def openGamePlay(level):
         playerCharacter.holdPos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open("Player-Data/CurrentPlayerScreen.txt") as screenNumHolder:
+                    screenNumHolder.write(playerCharacter.currScreen)
+                with open("Player-Data/CurrentPlayerLevel.txt") as levelNumHolder:
+                    levelNumHolder.write(playerCharacter.currLevel)
                 gameState = "endGame"
                 gameLoopRunning = False
                 continue
@@ -181,7 +186,7 @@ def openGamePlay(level):
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
 
         playerCharacter.update(HEIGHT, WIDTH, collisionObjects, playerCharacter, fanAirGroup)
-
+        playerScreen = playerCharacter.currScreen
         screen.blit(bgImage, (0, 0))
         gameTileGroup.draw(screen)
         screen.blit(playerCharacter.image, playerCharacter.rect)
@@ -192,6 +197,7 @@ def openGamePlay(level):
 
 
 def levelOneData():
+    global playerScreen
     playerGroup = pygame.sprite.Group()
     bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1bgph.png").convert_alpha()
     bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
@@ -206,13 +212,13 @@ def levelTwoData():
     bgLevel2Image = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()
     bgLevel2Image = pygame.transform.scale(bgLevel2Image, (WIDTH, HEIGHT))
     playerCharacter = Player(10, 860, 20, 50,
-                             "Images\\Player\\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9)
+                             "Images\\Player\\placeholderPlayer.png", 20, 2, 5, 50, 1, 30, 500, 0.9, 5)
     levelData = makeLevel("2", str(playerScreen))
     return bgLevel2Image, playerCharacter, levelData
 
 
 def makeLevel(levelNum, screenNum):
-    with open(f"Levels/Level1Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
+    with open(f"Levels/Level{levelNum}Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
         return levelToLoad.read()
 
 

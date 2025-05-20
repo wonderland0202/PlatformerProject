@@ -33,6 +33,8 @@ class Player(pygame.sprite.Sprite):
         self.lastPos = self.rect.center
         self.origPos = self.rect.center
         self.tileOffset = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
+        self.currLevel = 1
+        self.currScreen = 1
 
     def update(self, screenHeight, screenWidth, tileGroup, playerCharacter, fanAirGroup):
         keys = pygame.key.get_pressed()
@@ -106,7 +108,9 @@ class Player(pygame.sprite.Sprite):
 
     def boundCheck(self, screenWidth, screenHeight):
         if self.rect.right > screenWidth:
-            self.rect.right = screenWidth
+            print("hit right wall")
+            self.rect.left = 0
+            self.currScreen += 1
         if self.rect.left < 0:
             self.rect.left = 0
         if self.rect.bottom > screenHeight:
