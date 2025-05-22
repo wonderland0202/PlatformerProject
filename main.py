@@ -19,6 +19,7 @@ gameState = "startScreen"
 font = pygame.font.SysFont("Consolas", 24)
 running = True
 needBuild = True
+prevT = None
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -108,14 +109,16 @@ def openStartScreen():
 
 
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild
+    global gameState, playerScreen, needBuild, prevT
+
+    playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
+                             "Images\\Player\\placeholderPlayer.png", 15, 2, 5, 50, 1, 30, 500, 0.9, 5)
 
     gameLoopRunning = True
 
-
     while gameLoopRunning:
         if needBuild:
-            playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen)
+            collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
             needBuild = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -139,22 +142,26 @@ def openGamePlay(level):
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT)
 
 
-        # Handle screen transition
-        if transition == "SCREENUP":
-            print("scrUP")
-            playerScreen += 1
-            playerCharacter.currScreen = playerScreen
-            playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen)
-            needBuild = True
+        if prevT != transition:
 
-        elif transition == "SCREENDOWN":
-            if playerScreen > 1:
-                playerScreen -= 1
+            # Handle screen transition
+            if transition == "SCREENUP":
+                print("scrUP")
+                playerScreen += 1
                 playerCharacter.currScreen = playerScreen
-                playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen)
-            else:
-                # Prevent screen change on screen 1
-                playerCharacter.rect.left = 0
+                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                needBuild = True
+
+            elif transition == "SCREENDOWN":
+                if playerScreen > 1:
+                    playerScreen -= 1
+                    playerCharacter.currScreen = playerScreen
+                    collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                else:
+                    # Prevent screen change on screen 1
+                    playerCharacter.rect.left = 0
+
+        prevT = transition
 
         screen.blit(bgImage, (0, 0))
         gameTileGroup.draw(screen)
@@ -166,9 +173,9 @@ def openGamePlay(level):
 
 
 
-def buildLevel(level, screen):
+def buildLevel(level, screen, playerCharacter):
     if level == 1:
-        bgImage, playerCharacter, levelData = levelOneData(screen)
+        bgImage, levelData = levelOneData(screen, playerCharacter)
     elif level == 2:
         bgImage, playerCharacter, levelData = levelTwoData(screen)
 
@@ -197,7 +204,8 @@ def buildLevel(level, screen):
             "N": "Levels/LevelMakeup/FloorToWall-Up.png",
             "P": "Levels/LevelMakeup/CeilingToWall-Up.png",
             "I": "Levels/LevelMakeup/WallToCeiling-Up.png",
-            "B": "Levels/LevelMakeup/FacingUpFan.png"
+            "B": "Levels/LevelMakeup/FacingUpFan.png",
+            "T": "Levels/LevelMakeup/WallToFloor-Down.png"
         }.get(char, "Levels/LevelMakeup/EmptyTile.png")
 
         if char == " " or char == "O":
@@ -221,23 +229,23 @@ def buildLevel(level, screen):
             xValPixelated = 0
             yValPixelated += 1
 
-    return playerCharacter, collisionObjects, fanAirGroup, bgImage, gameTileGroup
 
 
-def levelOneData(screen):
-    playerCharacter = Player(WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
-                             "Images\\Player\\placeholderPlayer.png", 15, 2, 5, 50, 1, 30, 500, 0.9, 5)
+    return collisionObjects, fanAirGroup, bgImage, gameTileGroup
+
+
+def levelOneData(screen, playerCharacter):
     playerCharacter.currLevel = 1
     playerCharacter.currScreen = screen
     bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1bgph.png").convert_alpha()
     bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
     levelData = makeLevel("1", str(screen))
-    return bgLevel1Image, playerCharacter, levelData
+    return bgLevel1Image, levelData
 
 
 def levelTwoData(screen):
-    playerCharacter = Player(10, 860, 20, 50,
-                             "Images\\Player\\placeholderPlayer.png", 10, 2, 5, 50, 1, 30, 500, 0.9, 5)
+    playerCharacter = Player(4 * WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
+                             "Images\\Player\\placeholderPlayer.png", 15, 2, 5, 50, 1, 30, 500, 0.9, 5)
     playerCharacter.currLevel = 2
     playerCharacter.currScreen = screen
     bgLevel2Image = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()
