@@ -29,7 +29,7 @@ with open("Player-Data\\CurrentPlayerScreen.txt") as currScreen:
 
 
 def openStartScreen():
-    global gameState
+    global gameState, needBuild
     startScreenRunning = True
     mainMenuIndex = 0
 
@@ -93,6 +93,7 @@ def openStartScreen():
                     if mainMenuIndex == 0:
                         gameState = "settingsMenu"
                     elif mainMenuIndex == 1:
+                        needBuild = True
                         gameState = "gamePlay"
                     elif mainMenuIndex == 2:
                         gameState = "levelsMenu"
@@ -284,7 +285,7 @@ def incrementScreen():
 
 
 def openPauseMenu():
-    global gameState
+    global gameState, needBuild
     pauseMenuRunning = True
     pauseMenuIndex = 0
 
@@ -321,6 +322,7 @@ def openPauseMenu():
                         pauseMenuContinueButton.highlight()
                 if event.key == pygame.K_SPACE:
                     if pauseMenuIndex == 0:
+                        needBuild = True
                         gameState = "gamePlay"
                     elif pauseMenuIndex == 1:
                         gameState = "startScreen"
