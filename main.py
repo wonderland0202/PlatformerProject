@@ -10,7 +10,6 @@ pygame.init()
 # Global constants
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
-WIDTH, HEIGHT = 725, 450
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Platformer")
 clock = pygame.time.Clock()
@@ -111,8 +110,8 @@ def openStartScreen():
 def openGamePlay(level):
     global gameState, playerScreen, needBuild, prevT
 
-    playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
-                             "Images\\Player\\placeholderPlayer.png", 15, 2, 5, 50, 1, 30, 500, 0.9, 5)
+    playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
+                             "Images\\Player\\placeholderPlayer.png", HEIGHT / 45, WIDTH / 200, 50,  500, HEIGHT / 1000, WIDTH / 400)
 
     gameLoopRunning = True
 
@@ -151,12 +150,14 @@ def openGamePlay(level):
                 playerCharacter.currScreen = playerScreen
                 collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
                 needBuild = True
+                playerCharacter.origPos = playerCharacter.rect.center
 
             elif transition == "SCREENDOWN":
                 if playerScreen > 1:
                     playerScreen -= 1
                     playerCharacter.currScreen = playerScreen
                     collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                    playerCharacter.origPos = playerCharacter.rect.center
                 else:
                     # Prevent screen change on screen 1
                     playerCharacter.rect.left = 0
@@ -245,7 +246,7 @@ def levelOneData(screen, playerCharacter):
 
 def levelTwoData(screen):
     playerCharacter = Player(4 * WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
-                             "Images\\Player\\placeholderPlayer.png", 15, 2, 5, 50, 1, 30, 500, 0.9, 5)
+                             "Images\\Player\\placeholderPlayer.png", 15, 5, 50, 1, 30, 500, 0.9, 5)
     playerCharacter.currLevel = 2
     playerCharacter.currScreen = screen
     bgLevel2Image = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()

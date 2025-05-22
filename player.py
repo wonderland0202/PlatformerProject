@@ -1,7 +1,7 @@
 import pygame.sprite
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, image, jumpHeight, jumpNum, speed, dashDist, dashNum, dashCooldown, climbLen, gravity, speedBoost):
+    def __init__(self, x, y, width, height, image, jumpHeight, speed, dashDist, climbLen, gravity, speedBoost):
         super().__init__()
 
         # Position
@@ -17,7 +17,6 @@ class Player(pygame.sprite.Sprite):
 
         # Movement
         self.jumpHeight = jumpHeight
-        self.jumpNum = jumpNum
         self.speed = 0
         self.lSpeed = speed * -1
         self.rSpeed = speed
@@ -25,8 +24,6 @@ class Player(pygame.sprite.Sprite):
         self.speedBoost = speedBoost
         self.gravity = gravity
         self.dashDist = dashDist
-        self.dashNum = dashNum
-        self.dashCooldown = dashCooldown
         self.climbLen = climbLen
         self.speedY = 0
         self.onGround = False
@@ -115,7 +112,7 @@ class Player(pygame.sprite.Sprite):
             self.transitionVal = "SCREENDOWN"
 
         if self.rect.bottom > screenHeight:
-            self.rect.bottom = screenHeight
+            self.rect.center = self.origPos
 
         if self.rect.top < 0:
             self.transitionVal = "LEVELUP"
