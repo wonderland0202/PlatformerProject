@@ -31,24 +31,24 @@ with open("Player-Data\\CurrentPlayerScreen.txt") as currScreen:
 def openStartScreen():
     global gameState
     startScreenRunning = True
-    menuIndex = 0
+    mainMenuIndex = 0
 
     # Buttons
-    menuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5,
+    mainMenuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5,
                                     "Images\\Buttons\\placeholderButton.png",
                                     "Images\\Buttons\\placeholderButton-Selected.png")
-    menuLevelsButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7,
+    mainMenuLevelsButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7,
                                   "Images\\Buttons\\placeholderButton.png",
                                   "Images\\Buttons\\placeholderButton-Selected.png")
-    menuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8,
+    mainMenuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8,
                                 "Images\\Buttons\\placeholderButton.png",
                                 "Images\\Buttons\\placeholderButton-Selected.png")
-    menuSettingsButton = MenuButton(12 * WIDTH / 13, HEIGHT / 13, WIDTH / 10, WIDTH / 10,
+    mainMenuSettingsButton = MenuButton(12 * WIDTH / 13, HEIGHT / 13, WIDTH / 10, WIDTH / 10,
                                     "Images\\Buttons\\placeholderButton.png",
                                     "Images\\Buttons\\placeholderButton-Selected.png")
 
-    menuContinueButton.highlight()
-    buttonGroup = pygame.sprite.Group(menuContinueButton, menuLevelsButton, menuQuitButton, menuSettingsButton)
+    mainMenuContinueButton.highlight()
+    mainMenuButtonGroup = pygame.sprite.Group(mainMenuContinueButton, mainMenuLevelsButton, mainMenuQuitButton, mainMenuSettingsButton)
     bgMenuImage = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()
     bgMenuImage = pygame.transform.scale(bgMenuImage, (WIDTH, HEIGHT))
 
@@ -59,50 +59,50 @@ def openStartScreen():
                 startScreenRunning = False
                 continue
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_DELETE:
                     gameState = "endGame"
                     startScreenRunning = False
                     continue
                 if event.key == pygame.K_DOWN:
-                    if menuIndex == 0:
-                        menuIndex += 1
-                        menuSettingsButton.unhighlight()
-                        menuContinueButton.highlight()
-                    elif menuIndex == 1:
-                        menuIndex += 1
-                        menuContinueButton.unhighlight()
-                        menuLevelsButton.highlight()
-                    elif menuIndex == 2:
-                        menuIndex += 1
-                        menuLevelsButton.unhighlight()
-                        menuQuitButton.highlight()
+                    if mainMenuIndex == 0:
+                        mainMenuIndex += 1
+                        mainMenuSettingsButton.unhighlight()
+                        mainMenuContinueButton.highlight()
+                    elif mainMenuIndex == 1:
+                        mainMenuIndex += 1
+                        mainMenuContinueButton.unhighlight()
+                        mainMenuLevelsButton.highlight()
+                    elif mainMenuIndex == 2:
+                        mainMenuIndex += 1
+                        mainMenuLevelsButton.unhighlight()
+                        mainMenuQuitButton.highlight()
                 if event.key == pygame.K_UP:
-                    if menuIndex == 3:
-                        menuIndex -= 1
-                        menuQuitButton.unhighlight()
-                        menuLevelsButton.highlight()
-                    elif menuIndex == 2:
-                        menuIndex -= 1
-                        menuLevelsButton.unhighlight()
-                        menuContinueButton.highlight()
-                    elif menuIndex == 1:
-                        menuIndex -= 1
-                        menuContinueButton.unhighlight()
-                        menuSettingsButton.highlight()
+                    if mainMenuIndex == 3:
+                        mainMenuIndex -= 1
+                        mainMenuQuitButton.unhighlight()
+                        mainMenuLevelsButton.highlight()
+                    elif mainMenuIndex == 2:
+                        mainMenuIndex -= 1
+                        mainMenuLevelsButton.unhighlight()
+                        mainMenuContinueButton.highlight()
+                    elif mainMenuIndex == 1:
+                        mainMenuIndex -= 1
+                        mainMenuContinueButton.unhighlight()
+                        mainMenuSettingsButton.highlight()
                 if event.key == pygame.K_SPACE:
-                    if menuIndex == 0:
+                    if mainMenuIndex == 0:
                         gameState = "settingsMenu"
-                    elif menuIndex == 1:
+                    elif mainMenuIndex == 1:
                         gameState = "gamePlay"
-                    elif menuIndex == 2:
+                    elif mainMenuIndex == 2:
                         gameState = "levelsMenu"
-                    elif menuIndex == 3:
+                    elif mainMenuIndex == 3:
                         gameState = "endGame"
                     startScreenRunning = False
                     continue
 
         screen.blit(bgMenuImage, (0, 0))
-        buttonGroup.draw(screen)
+        mainMenuButtonGroup.draw(screen)
         clock.tick(FPS)
         pygame.display.update()
 
@@ -129,10 +129,15 @@ def openGamePlay(level):
                 gameLoopRunning = False
                 continue
 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                gameState = "endGame"
-                gameLoopRunning = False
-                continue
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DELETE:
+                    gameState = "endGame"
+                    gameLoopRunning = False
+                    continue
+                if event.key == pygame.K_ESCAPE:
+                    gameState = "paused"
+                    gameLoopRunning = False
+                    continue
 
         fps = int(clock.get_fps())
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
@@ -279,11 +284,52 @@ def incrementScreen():
 
 
 def openPauseMenu():
-    pass
+    global gameState
+    pauseMenuRunning = True
+    pauseMenuIndex = 0
 
+    pauseMenuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5,
+                                        "Images\\Buttons\\placeholderButton.png",
+                                        "Images\\Buttons\\placeholderButton-Selected.png")
+    pauseMenuMainMenuButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7,
+                                      "Images\\Buttons\\placeholderButton.png",
+                                      "Images\\Buttons\\placeholderButton-Selected.png")
 
-def openLoseScreen():
-    pass
+    pauseMenuContinueButton.highlight()
+    mainMenuButtonGroup = pygame.sprite.Group(pauseMenuContinueButton, pauseMenuMainMenuButton)
+
+    while pauseMenuRunning:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameState = "endGame"
+                pauseMenuRunning = False
+                continue
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DELETE:
+                    gameState = "endGame"
+                    pauseMenuRunning = False
+                    continue
+                if event.key == pygame.K_DOWN:
+                    if pauseMenuIndex == 0:
+                        pauseMenuIndex += 1
+                        pauseMenuContinueButton.unhighlight()
+                        pauseMenuMainMenuButton.highlight()
+                if event.key == pygame.K_UP:
+                    if pauseMenuIndex == 1:
+                        pauseMenuIndex -= 1
+                        pauseMenuMainMenuButton.unhighlight()
+                        pauseMenuContinueButton.highlight()
+                if event.key == pygame.K_SPACE:
+                    if pauseMenuIndex == 0:
+                        gameState = "gamePlay"
+                    elif pauseMenuIndex == 1:
+                        gameState = "startScreen"
+                    pauseMenuRunning = False
+                    continue
+
+        mainMenuButtonGroup.draw(screen)
+        clock.tick(FPS)
+        pygame.display.update()
 
 
 def openLevelsMenu():
@@ -303,8 +349,6 @@ while running:
         openGamePlay(playerLevel)
     elif gameState == "paused":
         openPauseMenu()
-    elif gameState == "loseScreen":
-        openLoseScreen()
     elif gameState == "levelsMenu":
         openLevelsMenu()
     elif gameState == "settingsMenu":
