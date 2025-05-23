@@ -24,6 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.speedBoost = speedBoost
         self.gravity = gravity
         self.dashDist = dashDist
+        self.dashNum = 1
         self.climbLen = climbLen
         self.speedY = 0
         self.onGround = False
@@ -33,9 +34,23 @@ class Player(pygame.sprite.Sprite):
         self.currLevel = 1
         self.currScreen = 1
         self.transitionVal = None
+        self.dashSpeedX = 0
+        self.dashSpeedY = 0
+        self.dashDuration = 50  # Number of frames the dash lasts
+        self.dashTimer = 0
+        self.dashPressed = False
 
     def update(self, screenHeight, screenWidth, tileGroup, playerCharacter, fanAirGroup):
         keys = pygame.key.get_pressed()
+
+        # Apply dash movement if dash is active
+        if self.dashTimer > 0:
+            self.rect.x += int(self.dashSpeedX)
+            self.rect.y += int(self.dashSpeedY)
+            self.dashTimer -= 1
+        else:
+            self.dashSpeedX = 0
+            self.dashSpeedY = 0
 
         # Horizontal movement
         self.rect.x += self.speed
@@ -48,7 +63,8 @@ class Player(pygame.sprite.Sprite):
         self.doCollision(tileGroup, playerCharacter, axis="y")
 
         # Input and position update
-        self.move(keys)
+        if self.dashTimer <= 0:
+            self.move(keys)
         self.boundCheck(screenWidth, screenHeight)
         # FanAir push
         fanCollisions = pygame.sprite.spritecollide(playerCharacter, fanAirGroup, False)
@@ -77,7 +93,15 @@ class Player(pygame.sprite.Sprite):
                 self.speedY = -self.jumpHeight
                 self.onGround = False
 
+        if keys[pygame.K_UP]:
+            if not self.dashPressed and self.dashNum > 0:
+                self.dash(keys)
+                self.dashPressed = True
+        else:
+            self.dashPressed = False
+
         if keys[pygame.K_r]:
+            print(f"resetting\nPrevious Position: {self.rect.centerx, self.rect.centery}")
             self.rect.center = self.origPos
             print("reset")
 
@@ -97,12 +121,12 @@ class Player(pygame.sprite.Sprite):
                     self.rect.bottom = collider.rect.top
                     self.speedY = 0
                     self.onGround = True
+                    self.dashNum = 1
                 elif self.speedY < 0:  # Jumping
                     self.rect.top = collider.rect.bottom
                     self.speedY = 0
 
     def boundCheck(self, screenWidth, screenHeight):
-        self.transitionVal = self.transitionVal
         if self.rect.right > screenWidth - 0.1:
             self.rect.left = 2
             self.transitionVal = "SCREENUP"
@@ -118,7 +142,39 @@ class Player(pygame.sprite.Sprite):
             self.transitionVal = "LEVELUP"
 
 
-
+        print(self.transitionVal)
+        self.transitionVal = None
         return self.transitionVal
+
+    def dash(self, keys):
+        if self.dashNum <= 0:
+            return
+
+        dx = 0
+        dy = 0
+
+        if keys[pygame.K_w]:  # Up
+            dy = -1
+        if keys[pygame.K_s]:  # Down
+            dy = 1
+        if keys[pygame.K_a]:  # Left
+            dx = -1
+        if keys[pygame.K_d]:  # Right
+            dx = 1
+
+        if dx == 0 and dy == 0:
+            return  # No direction pressed
+
+
+
+        # Set dash velocity
+        self.dashSpeedX = dx * self.dashDist / self.dashDuration
+        self.dashSpeedY = dy * self.dashDist / self.dashDuration
+        self.dashTimer = self.dashDuration
+
+        self.dashNum -= 1
+        print(f"Dash started: dx={dx}, dy={dy}, speedX={self.dashSpeedX}, speedY={self.dashSpeedY}")
+
+
 
 

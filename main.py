@@ -59,7 +59,7 @@ def openStartScreen():
                 startScreenRunning = False
                 continue
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DELETE:
+                if event.key == pygame.K_BACKSPACE:
                     gameState = "endGame"
                     startScreenRunning = False
                     continue
@@ -112,7 +112,7 @@ def openGamePlay(level):
     global gameState, playerScreen, needBuild, prevT
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\placeholderPlayer.png", HEIGHT / 45, WIDTH / 200, 50,  500, HEIGHT / 1000, WIDTH / 400)
+                             "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, WIDTH / 200, WIDTH / 5,  500, HEIGHT / 4000, WIDTH / 400)
 
     gameLoopRunning = True
 
@@ -131,7 +131,7 @@ def openGamePlay(level):
                 continue
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DELETE:
+                if event.key == pygame.K_BACKSPACE:
                     gameState = "endGame"
                     gameLoopRunning = False
                     continue
@@ -154,6 +154,7 @@ def openGamePlay(level):
                 print("scrUP")
                 playerScreen += 1
                 playerCharacter.currScreen = playerScreen
+                print(playerScreen, playerCharacter.currScreen)
                 collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
                 needBuild = True
                 playerCharacter.origPos = playerCharacter.rect.center
@@ -306,7 +307,7 @@ def openPauseMenu():
                 pauseMenuRunning = False
                 continue
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DELETE:
+                if event.key == pygame.K_BACKSPACE:
                     gameState = "endGame"
                     pauseMenuRunning = False
                     continue
