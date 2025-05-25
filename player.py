@@ -44,20 +44,15 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
 
         # Apply dash movement if dash is active
-        if self.dashTimer > 0:
-            self.rect.x += int(self.dashSpeedX)
-            self.rect.y += int(self.dashSpeedY)
-            self.dashTimer -= 1
-        else:
-            self.dashSpeedX = 0
-            self.dashSpeedY = 0
+
 
         # Horizontal movement
         self.rect.x += self.speed
         self.doCollision(tileGroup, playerCharacter, axis="x")
 
         # Vertical movement (gravity)
-        self.speedY += self.gravity
+        if self.dashTimer <= 0:
+            self.speedY += self.gravity
         self.rect.y += self.speedY
         self.onGround = False  # Assume airborne; will be corrected if grounded
         self.doCollision(tileGroup, playerCharacter, axis="y")
@@ -70,6 +65,14 @@ class Player(pygame.sprite.Sprite):
         fanCollisions = pygame.sprite.spritecollide(playerCharacter, fanAirGroup, False)
         if fanCollisions:
             self.speedY = -self.jumpHeight / 2  # Adjust push strength as desired
+
+        if self.dashTimer > 0:
+            self.rect.x += int(self.dashSpeedX)
+            self.rect.y += int(self.dashSpeedY)
+            self.dashTimer -= 1
+        else:
+            self.dashSpeedX = 0
+            self.dashSpeedY = 0
 
         self.x, self.y = self.rect.topleft
 
@@ -143,7 +146,7 @@ class Player(pygame.sprite.Sprite):
 
 
         print(self.transitionVal)
-        self.transitionVal = None
+        #self.transitionVal = None
         return self.transitionVal
 
     def dash(self, keys):

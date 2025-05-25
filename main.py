@@ -1,5 +1,5 @@
 import pygame
-import os
+import math
 
 from player import Player
 from menuButton import MenuButton
@@ -33,6 +33,11 @@ def openStartScreen():
     startScreenRunning = True
     mainMenuIndex = 0
 
+    titleImage = pygame.image.load("Images\\TitleScreen\\TitleImage.png").convert_alpha()
+    titleImage = pygame.transform.scale(titleImage, (WIDTH / 3, HEIGHT / 10))
+    titlePos = 0
+    titlePosMult = 1
+
     # Buttons
     mainMenuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5,
                                     "Images\\Buttons\\placeholderButton.png",
@@ -51,6 +56,7 @@ def openStartScreen():
     mainMenuButtonGroup = pygame.sprite.Group(mainMenuContinueButton, mainMenuLevelsButton, mainMenuQuitButton, mainMenuSettingsButton)
     bgMenuImage = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()
     bgMenuImage = pygame.transform.scale(bgMenuImage, (WIDTH, HEIGHT))
+
 
     while startScreenRunning:
         for event in pygame.event.get():
@@ -102,7 +108,15 @@ def openStartScreen():
                     startScreenRunning = False
                     continue
 
+        if titlePos >= 1:
+            titlePosMult = -1
+        elif titlePos <= -1:
+            titlePosMult = 1
+
+        titlePos += 0.02 * titlePosMult
+
         screen.blit(bgMenuImage, (0, 0))
+        screen.blit(titleImage, ((WIDTH / 2 - (titleImage.get_width() / 2)), 30 * math.sin(titlePos) + (HEIGHT / 15)))
         mainMenuButtonGroup.draw(screen)
         clock.tick(FPS)
         pygame.display.update()
@@ -158,6 +172,7 @@ def openGamePlay(level):
                 collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
                 needBuild = True
                 playerCharacter.origPos = playerCharacter.rect.center
+                playerCharacter.transitionVal = None
 
             elif transition == "SCREENDOWN":
                 if playerScreen > 1:
@@ -168,6 +183,8 @@ def openGamePlay(level):
                 else:
                     # Prevent screen change on screen 1
                     playerCharacter.rect.left = 0
+                playerCharacter.transitionVal = None
+
 
         prevT = transition
 
@@ -219,18 +236,18 @@ def buildLevel(level, screen, playerCharacter):
         if char == " " or char == "O":
             collisionVal = False
 
+
+
+        if char == "B":
+            for offset in range(1, 4):  # 3 tiles above
+                airY = y - offset * (HEIGHT / 9)
+                fanAir = collisionObject(x, airY, WIDTH / 14, HEIGHT / 9, "Levels/LevelMakeup/FanAir.png", False, "fanAir")
+                fanAirGroup.add(fanAir)
+                gameTileGroup.add(fanAir)
         newGameTile = collisionObject(x, y, WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, char)
         gameTileGroup.add(newGameTile)
         if collisionVal:
             collisionObjects.add(newGameTile)
-
-        if char == "B":
-            for offset in range(1, 4):  # 3 tiles above
-                air_y = y - offset * (HEIGHT / 9)
-                fanAir = collisionObject(x, air_y, WIDTH / 14, HEIGHT / 9, "Levels/LevelMakeup/FanAir.png", False, "fanAir")
-                fanAirGroup.add(fanAir)
-                gameTileGroup.add(fanAir)
-
         if char != 'O':
             xValPixelated += 1
         if xValPixelated > 14:
