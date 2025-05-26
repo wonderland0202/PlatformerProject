@@ -4,14 +4,17 @@ import math
 from player import Player
 from menuButton import MenuButton
 from collisionObject import collisionObject
+from objectiveBlock import objectiveBlock
 
 pygame.init()
 
 # Global constants
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
+# screen size for debugging
+#WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Platformer")
+pygame.display.set_caption("Neon Lights")
 clock = pygame.time.Clock()
 FPS = 144
 gameState = "startScreen"
@@ -126,7 +129,9 @@ def openGamePlay(level):
     global gameState, playerScreen, needBuild, prevT
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, WIDTH / 200, WIDTH / 5,  500, HEIGHT / 4000, WIDTH / 400)
+                             "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
+
+    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, playerCharacter.height * 2, WIDTH / 28)
 
     gameLoopRunning = True
 
@@ -157,7 +162,8 @@ def openGamePlay(level):
         fps = int(clock.get_fps())
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
 
-        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, playerCharacter, fanAirGroup)
+        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, fanAirGroup)
+        gameObjectiveBlock.update(HEIGHT, WIDTH, playerCharacter, collisionObjects, fanAirGroup)
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT)
 
 
@@ -165,10 +171,8 @@ def openGamePlay(level):
 
             # Handle screen transition
             if transition == "SCREENUP":
-                print("scrUP")
                 playerScreen += 1
                 playerCharacter.currScreen = playerScreen
-                print(playerScreen, playerCharacter.currScreen)
                 collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
                 needBuild = True
                 playerCharacter.origPos = playerCharacter.rect.center
@@ -191,6 +195,7 @@ def openGamePlay(level):
         screen.blit(bgImage, (0, 0))
         gameTileGroup.draw(screen)
         screen.blit(playerCharacter.image, playerCharacter.rect)
+        screen.blit(gameObjectiveBlock.image, gameObjectiveBlock.rect)
         screen.blit(fpsText, (WIDTH / 145, HEIGHT / 90))
 
         clock.tick(FPS)
