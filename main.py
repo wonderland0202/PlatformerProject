@@ -131,6 +131,8 @@ def openGamePlay(level):
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
                              "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
 
+    playerGroup = pygame.sprite.Group(playerCharacter)
+
     gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, playerCharacter.height * 2, WIDTH / 28)
 
     gameLoopRunning = True
@@ -162,9 +164,9 @@ def openGamePlay(level):
         fps = int(clock.get_fps())
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
 
-        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, fanAirGroup)
-        gameObjectiveBlock.update(HEIGHT, WIDTH, playerCharacter, collisionObjects, fanAirGroup)
-        transition = playerCharacter.boundCheck(WIDTH, HEIGHT)
+        playerCharacter.update(HEIGHT, WIDTH, collisionObjects, fanAirGroup, gameObjectiveBlock)
+        gameObjectiveBlock.update(HEIGHT, WIDTH, playerCharacter, collisionObjects, fanAirGroup, playerGroup)
+        transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
 
 
         if prevT != transition:

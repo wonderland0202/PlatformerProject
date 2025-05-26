@@ -44,7 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.transitionVal = None
 
 
-    def update(self, screenHeight, screenWidth, tileGroup, fanAirGroup):
+    def update(self, screenHeight, screenWidth, tileGroup, fanAirGroup, objectiveBlock):
         keys = pygame.key.get_pressed()
 
         if self.onGround:
@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
 
         # Input and position update
         self.move(keys)
-        self.boundCheck(screenWidth, screenHeight)
+        self.boundCheck(screenWidth, screenHeight, objectiveBlock)
         # FanAir push
         fanCollisions = pygame.sprite.spritecollide(self, fanAirGroup, False)
         if fanCollisions:
@@ -123,14 +123,17 @@ class Player(pygame.sprite.Sprite):
                     self.rect.top = collider.rect.bottom
                     self.speedY = 0
 
-    def boundCheck(self, screenWidth, screenHeight):
+    def boundCheck(self, screenWidth, screenHeight, objectiveBlock):
         if self.rect.right > screenWidth - 0.1:
-            self.rect.left = 2
-            self.transitionVal = "SCREENUP"
+            if objectiveBlock.offScreen:
+                self.rect.left = 2
+                self.transitionVal = "SCREENUP"
+                objectiveBlock.rect.left = 1
 
         if self.rect.left < 0:
-            self.rect.right = screenWidth - 2
-            self.transitionVal = "SCREENDOWN"
+            if objectiveBlock.offScreen:
+                self.rect.right = screenWidth - 2
+                self.transitionVal = "SCREEND0OWN"
 
         if self.rect.bottom > screenHeight:
             self.rect.center = self.origPos

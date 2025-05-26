@@ -7,6 +7,7 @@ class objectiveBlock(pygame.sprite.Sprite):
         self.x = x
         self.y = y
 
+        self.offScreen = False
 
         self.width = width
         self.height = height
@@ -27,23 +28,31 @@ class objectiveBlock(pygame.sprite.Sprite):
 
         self.origPos = self.rect.center
 
-    def update(self, screenHeight, screenWidth, playerCharacter, tileGroup, fanAirGroup):
+    def update(self, screenHeight, screenWidth, playerCharacter, tileGroup, fanAirGroup, playerGroup):
+        keys = pygame.key.get_pressed()
 
-        # Horizontal movement
-        self.rect.x += self.speed
-        self.doGameTileCollision(tileGroup, axis="x")
+        if keys[pygame.K_r]:
+            self.rect.center = self.origPos
 
-        # Vertical movement (gravity)
-        self.speedY += self.gravity
-        self.rect.y += self.speedY
-        self.doGameTileCollision(tileGroup, axis="y")
+        if not self.offScreen:
+
+            # Horizontal movement
+            self.rect.x += self.speed
+            self.doGameTileCollision(tileGroup, axis="x")
+
+            # Vertical movement (gravity)
+            self.speedY += self.gravity
+            self.rect.y += self.speedY
+            self.doGameTileCollision(tileGroup, axis="y")
+
+            self.doPlayerCollision(playerCharacter, playerGroup)
 
         # Input and position update
-        self.boundCheck(screenWidth, screenHeight)
+            self.boundCheck(screenWidth, screenHeight)
         # FanAir push
-        fanCollisions = pygame.sprite.spritecollide(self, fanAirGroup, False)
-        if fanCollisions:
-            self.speedY = -playerCharacter.jumpHeight / 2  # Adjust push strength as desired
+            fanCollisions = pygame.sprite.spritecollide(self, fanAirGroup, False)
+            if fanCollisions:
+                self.speedY = -playerCharacter.jumpHeight / 2  # Adjust push strength as desired
 
         self.x, self.y = self.rect.topleft
 
@@ -67,17 +76,19 @@ class objectiveBlock(pygame.sprite.Sprite):
                     self.rect.top = collider.rect.bottom
                     self.speedY = 0
 
-    def doPlayerCollision(self, player):
-        if player.rect.centerx > self.rect.centerx:
-            self.speed -= self.pushSpeed
-        elif player.rect.centerx < self.rect.centerx:
-            self.speed += self.pushSpeed
+    def doPlayerCollision(self, player, playerGroup):
+        collidedPlayers = pygame.sprite.spritecollide(self, playerGroup, False)
+        if len(collidedPlayers) > 0:
+            if player.rect.centerx > self.rect.centerx:
+                self.speed -= self.pushSpeed
+            elif player.rect.centerx < self.rect.centerx:
+                self.speed += self.pushSpeed
 
 
     def boundCheck(self, screenWidth, screenHeight):
         if self.rect.right > screenWidth - 0.1:
-            self.rect.left = 2
-            self.transitionVal = "SCREENUP"
+            self.rect.left = screenWidth + 1
+            self.offScreen = True
 
         if self.rect.left < 0:
             self.rect.right = screenWidth - 2
