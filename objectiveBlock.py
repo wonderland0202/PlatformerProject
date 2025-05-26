@@ -98,4 +98,4 @@ class objectiveBlock(pygame.sprite.Sprite):
             self.rect.center = self.origPos
 
         if self.rect.top < 0:
-            self.transitionVal = "LEVELUP"
+            self.rect.top = 0
