@@ -13,7 +13,7 @@ pygame.init()
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
 # screen size for debugging
-#WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
+WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Neon Lights")
 clock = pygame.time.Clock()
@@ -135,7 +135,9 @@ def openGamePlay(level):
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
-    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, playerCharacter.height * 2, 1)
+    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, 5, 1)
+
+    objectiveBlockGroup = pygame.sprite.Group(gameObjectiveBlock)
 
     gameLoopRunning = True
 
@@ -168,18 +170,24 @@ def openGamePlay(level):
 
         playerCharacter.update(HEIGHT, WIDTH, collisionObjects, fanAirGroup, gameObjectiveBlock)
         gameObjectiveBlock.update(HEIGHT, WIDTH, playerCharacter, collisionObjects, fanAirGroup, playerGroup)
-        transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
+
+
+        #---------------#
+        #  KICKER CODE  #
+        #---------------#
 
         if pygame.key.get_pressed()[pygame.K_UP] and not kickerExists:
             kickUpValue = playerCharacter.kickUp()
-            if kickUpValue == "KickerToRight":
-                kicker = kickUp(playerCharacter.rect.right, playerCharacter.rect.bottom, 4 * playerCharacter.width / 5, playerCharacter.height / 2, objectiveBlock, 10)
+            if kickUpValue == "RIGHT":
+                kicker = kickUp(playerCharacter.rect.x + playerCharacter.width, playerCharacter.rect.y + playerCharacter.height, 4 * playerCharacter.width / 5, playerCharacter.height / 2, 10)
                 kickerExists = True
             else:
-                kicker = kickUp(playerCharacter.rect.left, playerCharacter.rect.bottom, 4 * playerCharacter.width / 5, playerCharacter.height / 2, objectiveBlock, 10)
+                kicker = kickUp(playerCharacter.rect.x - playerCharacter.width, playerCharacter.rect.y + playerCharacter.height, 4 * playerCharacter.width / 5, playerCharacter.height / 2, 10)
                 kickerExists = True
             itterNum = 0
             itterMax = kicker.itterMax
+
+        transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
 
         if prevT != transition:
 
@@ -216,9 +224,11 @@ def openGamePlay(level):
 
         if kickerExists:
             itterNum += 1
+            kicker.update(objectiveBlockGroup, gameObjectiveBlock)
             if itterNum > itterMax:
                 kickerExists = False
                 kicker.kill()
+                print("kickerKilled")
 
 
         clock.tick(FPS)

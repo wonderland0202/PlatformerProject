@@ -44,6 +44,8 @@ class Player(pygame.sprite.Sprite):
         self.currScreen = 1
         self.transitionVal = None
 
+        self.facingDir = "RIGHT"
+
 
     def update(self, screenHeight, screenWidth, tileGroup, fanAirGroup, objectiveBlock):
         keys = pygame.key.get_pressed()
@@ -72,6 +74,11 @@ class Player(pygame.sprite.Sprite):
         if fanCollisions:
             self.speedY = -self.jumpHeight / 2  # Adjust push strength as desired
 
+        if self.speed > 0:
+            self.facingDir = "RIGHT"
+        elif self.speed < 0:
+            self.facingDir = "LEFT"
+
         self.x, self.y = self.rect.topleft
 
     def move(self, keys):
@@ -98,9 +105,6 @@ class Player(pygame.sprite.Sprite):
 
         else:
             self.jumpPressed = False
-
-
-
 
         if keys[pygame.K_r]:
             self.rect.center = self.origPos
@@ -150,15 +154,8 @@ class Player(pygame.sprite.Sprite):
 
     def kickUp(self):
         print("making kicker")
-        kickerLoc = "kickerToRight"
-        if self.speed > 0:
-            kickerLoc = "KickerToRight"
-            print("kicker val (left)")
-        elif self.speed < 0:
-            kickerLoc = "KickerToLeft"
-            print("kicker val (right)")
 
-        return kickerLoc
+        return self.facingDir
 
         itterNum = 0
         frameNum = 10

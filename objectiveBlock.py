@@ -48,11 +48,12 @@ class objectiveBlock(pygame.sprite.Sprite):
             self.doPlayerCollision(playerCharacter, playerGroup)
 
         # Input and position update
-            self.boundCheck(screenWidth, screenHeight)
         # FanAir push
             fanCollisions = pygame.sprite.spritecollide(self, fanAirGroup, False)
             if fanCollisions:
                 self.speedY = -playerCharacter.jumpHeight / 2  # Adjust push strength as desired
+
+        self.boundCheck(screenWidth, screenHeight)
 
         self.x, self.y = self.rect.topleft
 
@@ -101,3 +102,8 @@ class objectiveBlock(pygame.sprite.Sprite):
 
         if self.rect.top < 0:
             self.rect.top = 0
+
+        if self.rect.left > 0 and self.rect.right < screenWidth - 0.1:
+            self.offScreen = False
+
+        print(self.offScreen)
