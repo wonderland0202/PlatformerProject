@@ -5,6 +5,7 @@ from player import Player
 from menuButton import MenuButton
 from collisionObject import collisionObject
 from objectiveBlock import objectiveBlock
+from kickUp import kickUp
 
 pygame.init()
 
@@ -22,6 +23,7 @@ font = pygame.font.SysFont("Consolas", 24)
 running = True
 needBuild = True
 prevT = None
+kickerExists = False
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -111,29 +113,29 @@ def openStartScreen():
                     startScreenRunning = False
                     continue
 
-        if titlePos >= 1:
+        if titlePos >= 0.5:
             titlePosMult = -1
-        elif titlePos <= -1:
+        elif titlePos <= -0.5:
             titlePosMult = 1
 
         titlePos += 0.02 * titlePosMult
 
         screen.blit(bgMenuImage, (0, 0))
-        screen.blit(titleImage, ((WIDTH / 2 - (titleImage.get_width() / 2)), 30 * math.sin(titlePos) + (HEIGHT / 15)))
+        screen.blit(titleImage, ((WIDTH / 2 - (titleImage.get_width() / 2)), 10 * math.sin(titlePos) + (HEIGHT / 15)))
         mainMenuButtonGroup.draw(screen)
         clock.tick(FPS)
         pygame.display.update()
 
 
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild, prevT
+    global gameState, playerScreen, needBuild, prevT, kickerExists
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
                              "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
-    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, playerCharacter.height * 2, WIDTH / 28)
+    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, playerCharacter.height * 2, 1)
 
     gameLoopRunning = True
 
@@ -168,6 +170,16 @@ def openGamePlay(level):
         gameObjectiveBlock.update(HEIGHT, WIDTH, playerCharacter, collisionObjects, fanAirGroup, playerGroup)
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
 
+        if pygame.key.get_pressed()[pygame.K_UP] and not kickerExists:
+            kickUpValue = playerCharacter.kickUp()
+            if kickUpValue == "KickerToRight":
+                kicker = kickUp(playerCharacter.rect.right, playerCharacter.rect.bottom, 4 * playerCharacter.width / 5, playerCharacter.height / 2, objectiveBlock, 10)
+                kickerExists = True
+            else:
+                kicker = kickUp(playerCharacter.rect.left, playerCharacter.rect.bottom, 4 * playerCharacter.width / 5, playerCharacter.height / 2, objectiveBlock, 10)
+                kickerExists = True
+            itterNum = 0
+            itterMax = kicker.itterMax
 
         if prevT != transition:
 
@@ -199,6 +211,15 @@ def openGamePlay(level):
         screen.blit(playerCharacter.image, playerCharacter.rect)
         screen.blit(gameObjectiveBlock.image, gameObjectiveBlock.rect)
         screen.blit(fpsText, (WIDTH / 145, HEIGHT / 90))
+        if kickerExists:
+            screen.blit(kicker.image, kicker.rect)
+
+        if kickerExists:
+            itterNum += 1
+            if itterNum > itterMax:
+                kickerExists = False
+                kicker.kill()
+
 
         clock.tick(FPS)
         pygame.display.update()

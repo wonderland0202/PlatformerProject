@@ -1,4 +1,5 @@
 import pygame.sprite
+from kickUp import kickUp
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image, jumpHeight, jumpNum, speed, climbLen, gravity, speedBoost):
@@ -99,6 +100,8 @@ class Player(pygame.sprite.Sprite):
             self.jumpPressed = False
 
 
+
+
         if keys[pygame.K_r]:
             self.rect.center = self.origPos
 
@@ -128,7 +131,7 @@ class Player(pygame.sprite.Sprite):
             if objectiveBlock.offScreen:
                 self.rect.left = 2
                 self.transitionVal = "SCREENUP"
-                objectiveBlock.rect.left = 1
+                objectiveBlock.rect.left = self.rect.right + 1
 
         if self.rect.left < 0:
             if objectiveBlock.offScreen:
@@ -145,6 +148,26 @@ class Player(pygame.sprite.Sprite):
         #self.transitionVal = None
         return self.transitionVal
 
+    def kickUp(self):
+        print("making kicker")
+        kickerLoc = "kickerToRight"
+        if self.speed > 0:
+            kickerLoc = "KickerToRight"
+            print("kicker val (left)")
+        elif self.speed < 0:
+            kickerLoc = "KickerToLeft"
+            print("kicker val (right)")
+
+        return kickerLoc
+
+        itterNum = 0
+        frameNum = 10
+        if itterNum < frameNum:
+            print("Kicker Updated")
+            kicker.update()
+        else:
+            print("Kicker Killed")
+            kicker.kill()
 
 
 

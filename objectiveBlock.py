@@ -83,6 +83,8 @@ class objectiveBlock(pygame.sprite.Sprite):
                 self.speed -= self.pushSpeed
             elif player.rect.centerx < self.rect.centerx:
                 self.speed += self.pushSpeed
+        else:
+            self.speed = 0
 
 
     def boundCheck(self, screenWidth, screenHeight):
