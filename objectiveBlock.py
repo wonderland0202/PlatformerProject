@@ -105,5 +105,3 @@ class objectiveBlock(pygame.sprite.Sprite):
 
         if self.rect.left > 0 and self.rect.right < screenWidth - 0.1:
             self.offScreen = False
-
-        print(self.offScreen)

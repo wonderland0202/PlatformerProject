@@ -12,5 +12,4 @@ class kickUp(pygame.sprite.Sprite):
     def update(self, oBG, objectiveBlock):
         collisions = pygame.sprite.spritecollide(self, oBG, False)
         if len(collisions) > 0:
-            print("collided")
             objectiveBlock.speedY = -objectiveBlock.pushHeight

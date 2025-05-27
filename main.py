@@ -228,7 +228,6 @@ def openGamePlay(level):
             if itterNum > itterMax:
                 kickerExists = False
                 kicker.kill()
-                print("kickerKilled")
 
 
         clock.tick(FPS)
