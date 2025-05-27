@@ -36,7 +36,7 @@ with open("Player-Data\\CurrentPlayerScreen.txt") as currScreen:
 def openStartScreen():
     global gameState, needBuild
     startScreenRunning = True
-    mainMenuIndex = 0
+    mainMenuIndex = 1
 
     titleImage = pygame.image.load("Images\\TitleScreen\\TitleImage.png").convert_alpha()
     titleImage = pygame.transform.scale(titleImage, (WIDTH / 3, HEIGHT / 10))
