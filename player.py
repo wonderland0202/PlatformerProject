@@ -44,7 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.transitionVal = None
 
         self.facingDir = "RIGHT"
-
+        self.grappling = False
 
     def update(self, screenHeight, screenWidth, tileGroup, fanAirGroup, objectiveBlock):
         keys = pygame.key.get_pressed()
@@ -105,6 +105,14 @@ class Player(pygame.sprite.Sprite):
         else:
             self.jumpPressed = False
 
+        if keys[pygame.K_RIGHT]:
+            if not self.rightPressed:
+                self.rightPressed = True
+                if not self.grappling:
+                    self.grapple()
+        else:
+            self.rightPressed = False
+
         if keys[pygame.K_r]:
             self.rect.center = self.origPos
 
@@ -153,15 +161,11 @@ class Player(pygame.sprite.Sprite):
         return self.transitionVal
 
     def kickUp(self):
-
         return self.facingDir
 
-        itterNum = 0
-        frameNum = 10
-        if itterNum < frameNum:
-            kicker.update()
+    def grapple(self):
+        if self.grappling:
+            self.grappling = False
         else:
-            kicker.kill()
-
-
+            self.grappling = True
 
