@@ -160,7 +160,7 @@ class Player(pygame.sprite.Sprite):
         #self.transitionVal = None
         return self.transitionVal
 
-    def kickUp(self):
+    def facingDir(self):
         return self.facingDir
 
     def grapple(self):

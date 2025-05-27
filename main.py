@@ -6,6 +6,7 @@ from menuButton import MenuButton
 from collisionObject import collisionObject
 from objectiveBlock import objectiveBlock
 from kickUp import kickUp
+from grappler import Grappler, GrapplerSegment
 
 pygame.init()
 
@@ -24,6 +25,7 @@ running = True
 needBuild = True
 prevT = None
 kickerExists = False
+grapplerExists = False
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -128,7 +130,7 @@ def openStartScreen():
 
 
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild, prevT, kickerExists
+    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
                              "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
@@ -177,8 +179,8 @@ def openGamePlay(level):
         #---------------#
 
         if pygame.key.get_pressed()[pygame.K_UP] and not kickerExists:
-            kickUpValue = playerCharacter.kickUp()
-            if kickUpValue == "RIGHT":
+            facingDir = playerCharacter.facingDir
+            if facingDir == "RIGHT":
                 kicker = kickUp(playerCharacter.rect.x + playerCharacter.width, playerCharacter.rect.y + playerCharacter.height, 4 * playerCharacter.width / 5, playerCharacter.height / 2, 10)
                 kickerExists = True
             else:
@@ -187,7 +189,25 @@ def openGamePlay(level):
             itterNum = 0
             itterMax = kicker.itterMax
 
+        # ----------------#
+        #  GRAPPLER CODE  #
+        # ----------------#
+        if not grapplerExists:
+            grapplerList = []
+        if pygame.key.get_pressed()[pygame.K_RIGHT] and not grapplerExists:
+            trueFacingDir = playerCharacter.facingDir
+            grapplerLenHolder = Grappler(playerCharacter, gameTileGroup, objectiveBlockGroup)
+            for i in range(grapplerLenHolder.grapplerLen):
+                if i + 1 < grapplerLenHolder.grapplerLen:
+                    grapplerPart = GrapplerSegment("LINK", playerCharacter.rect.x, playerCharacter.rect.y, trueFacingDir, i)
+                else:
+                    grapplerPart = GrapplerSegment("END", playerCharacter.rect.x, playerCharacter.rect.y, trueFacingDir, i)
+                grapplerList.append(grapplerPart)
+
+
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
+
+
 
         if prevT != transition:
 
