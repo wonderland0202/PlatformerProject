@@ -40,7 +40,7 @@ def openStartScreen():
     startScreenRunning = True
     mainMenuIndex = 1
 
-    titleImage = pygame.image.load("Images\\TitleScreen\\TitleImage.png").convert_alpha()
+    titleImage = pygame.image.load("Images/TitleScreen/TitleImage.png").convert_alpha()
     titleImage = pygame.transform.scale(titleImage, (WIDTH / 3, HEIGHT / 10))
     titlePos = 0
     titlePosMult = 1
@@ -207,10 +207,7 @@ def openGamePlay(level):
 
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
 
-
-
         if prevT != transition:
-
             # Handle screen transition
             if transition == "SCREENUP":
                 playerScreen += 1
@@ -218,6 +215,7 @@ def openGamePlay(level):
                 collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
                 needBuild = True
                 playerCharacter.origPos = playerCharacter.rect.center
+                gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
                 playerCharacter.transitionVal = None
 
             elif transition == "SCREENDOWN":
@@ -226,11 +224,19 @@ def openGamePlay(level):
                     playerCharacter.currScreen = playerScreen
                     collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
                     playerCharacter.origPos = playerCharacter.rect.center
+                    gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
                 else:
                     # Prevent screen change on screen 1
                     playerCharacter.rect.left = 0
                 playerCharacter.transitionVal = None
 
+            elif transition == "LEVELUP":
+                level += 1
+                playerScreen = 1
+                playerCharacter.currScreen = playerScreen
+                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                playerCharacter.origPos = playerCharacter.rect.center
+                gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
 
         prevT = transition
 
@@ -275,20 +281,20 @@ def buildLevel(level, screen, playerCharacter):
         y = yValPixelated * HEIGHT / 9
 
         objectIdentity = {
-            " ": "Levels/LevelMakeup/EmptyTile.png",
-            "W": "Levels/LevelMakeup/LeftWallLine.png",
-            "F": "Levels/LevelMakeup/FloorLine.png",
-            "Q": "Levels/LevelMakeup/RightWallLine.png",
-            "A": "Levels/LevelMakeup/InnerBuilding.png",
-            "C": "Levels/LevelMakeup/CeilingLine.png",
-            "V": "Levels/LevelMakeup/WallToFloor-Up.png",
-            "M": "Levels/LevelMakeup/FloorToWall-Down.png",
-            "N": "Levels/LevelMakeup/FloorToWall-Up.png",
-            "P": "Levels/LevelMakeup/CeilingToWall-Up.png",
-            "I": "Levels/LevelMakeup/WallToCeiling-Up.png",
-            "B": "Levels/LevelMakeup/FacingUpFan.png",
-            "T": "Levels/LevelMakeup/WallToFloor-Down.png"
-        }.get(char, "Levels/LevelMakeup/EmptyTile.png")
+            " ": f"Levels/EmptyTile.png",
+            "W": f"Levels/Level{level}/LevelMakeup/LeftWallLine.png",
+            "F": f"Levels/Level{level}/LevelMakeup/FloorLine.png",
+            "Q": f"Levels/Level{level}/LevelMakeup/RightWallLine.png",
+            "A": f"Levels/Level{level}/LevelMakeup/InnerBuilding.png",
+            "C": f"Levels/Level{level}/LevelMakeup/CeilingLine.png",
+            "V": f"Levels/Level{level}/LevelMakeup/WallToFloor-Up.png",
+            "M": f"Levels/Level{level}/LevelMakeup/FloorToWall-Down.png",
+            "N": f"Levels/Level{level}/LevelMakeup/FloorToWall-Up.png",
+            "P": f"Levels/Level{level}/LevelMakeup/CeilingToWall-Up.png",
+            "I": f"Levels/Level{level}/LevelMakeup/WallToCeiling-Up.png",
+            "B": f"Levels/Level{level}/LevelMakeup/FacingUpFan.png",
+            "T": f"Levels/Level{level}/LevelMakeup/WallToFloor-Down.png"
+        }.get(char, "Levels/EmptyTile.png")
 
         if char == " " or char == "O":
             collisionVal = False
@@ -298,7 +304,7 @@ def buildLevel(level, screen, playerCharacter):
         if char == "B":
             for offset in range(1, 4):  # 3 tiles above
                 airY = y - offset * (HEIGHT / 9)
-                fanAir = collisionObject(x, airY, WIDTH / 14, HEIGHT / 9, "Levels/LevelMakeup/FanAir.png", False, "fanAir")
+                fanAir = collisionObject(x, airY, WIDTH / 14, HEIGHT / 9, f"Levels/Level{level}/LevelMakeup/FanAir.png", False, "fanAir")
                 fanAirGroup.add(fanAir)
                 gameTileGroup.add(fanAir)
         newGameTile = collisionObject(x, y, WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, char)
@@ -338,7 +344,7 @@ def levelTwoData(screen):
 
 
 def makeLevel(levelNum, screenNum):
-    with open(f"Levels/Level{levelNum}Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
+    with open(f"Levels/Level{levelNum}/Level{levelNum}Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
         return levelToLoad.read()
 
 

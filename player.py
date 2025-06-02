@@ -147,14 +147,16 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             if objectiveBlock.offScreen:
                 self.rect.right = screenWidth - 2
-                self.transitionVal = "SCREEND0OWN"
+                self.transitionVal = "SCREENDOWN"
+                objectiveBlock.rect.right = self.rect.left - 1
 
         if self.rect.bottom > screenHeight:
             self.rect.center = self.origPos
             objectiveBlock.rect.center = objectiveBlock.origPos
 
         if self.rect.top < 0:
-            self.transitionVal = "LEVELUP"
+            if objectiveBlock.offScreen:
+                self.transitionVal = "LEVELUP"
 
 
         #self.transitionVal = None

@@ -94,8 +94,8 @@ class objectiveBlock(pygame.sprite.Sprite):
             self.offScreen = True
 
         if self.rect.left < 0:
-            self.rect.right = screenWidth - 2
-            self.transitionVal = "SCREENDOWN"
+            self.rect.right = -1
+            self.offScreen = True
 
         if self.rect.bottom > screenHeight:
             self.rect.center = self.origPos
