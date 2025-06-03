@@ -1,19 +1,41 @@
 import pygame.sprite
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, image, jumpHeight, jumpNum, speed, climbLen, gravity, speedBoost):
+    def __init__(self, x, y, width, height, rImage, lImage, nojImgR, nojImgL, jumpHeight, jumpNum, speed, climbLen, gravity, speedBoost):
         super().__init__()
 
         # Position
         self.x = x
         self.y = y
 
+        self.scrUpDir = "right"
+
         # Look
         self.width = width
         self.height = height
-        self.image = pygame.image.load(image).convert_alpha()
+
+        self.image = pygame.image.load(nojImgL).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+        self.nojImgL = self.image
+
+        self.image = pygame.image.load(nojImgR).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+        self.nojImgR = self.image
+
+        self.image = pygame.image.load(lImage).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+
+        self.jImgL = self.image
+
+        self.image = pygame.image.load(rImage).convert_alpha()
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
         self.rect = self.image.get_rect(center=(x, y))
+
+        self.jImgR = self.image
+
+
 
         # Movement
         self.jumpHeight = jumpHeight
@@ -80,6 +102,11 @@ class Player(pygame.sprite.Sprite):
 
         self.x, self.y = self.rect.topleft
 
+        if self.jumpPressed or self.jumpNum <= 0:
+            self.image = self.nojImg
+        else:
+            self.image = self.jImg
+
     def move(self, keys):
         if keys[pygame.K_d]:
             self.speed = self.rSpeed
@@ -141,14 +168,23 @@ class Player(pygame.sprite.Sprite):
         if self.rect.right > screenWidth - 0.1:
             if objectiveBlock.offScreen:
                 self.rect.left = 2
-                self.transitionVal = "SCREENUP"
-                objectiveBlock.rect.left = self.rect.right + 1
+                if self.scrUpDir == "right":
+                    self.transitionVal = "SCREENUP"
+                    objectiveBlock.rect.left = self.rect.right + 1
+                elif self.scrUpDir == "left":
+                    self.transitionVal = "SCREENDOWN"
+                    objectiveBlock.rect.left = self.rect.right - 1
+
 
         if self.rect.left < 0:
             if objectiveBlock.offScreen:
                 self.rect.right = screenWidth - 2
-                self.transitionVal = "SCREENDOWN"
-                objectiveBlock.rect.right = self.rect.left - 1
+                if self.scrUpDir == "right":
+                    self.transitionVal = "SCREENDOWN"
+                    objectiveBlock.rect.left = self.rect.right - 1
+                elif self.scrUpDir == "left":
+                    self.transitionVal = "SCREENUP"
+                    objectiveBlock.rect.right = self.rect.left + 1
 
         if self.rect.bottom > screenHeight:
             self.rect.center = self.origPos
@@ -157,7 +193,6 @@ class Player(pygame.sprite.Sprite):
         if self.rect.top < 0:
             if objectiveBlock.offScreen:
                 self.transitionVal = "LEVELUP"
-                print("LEVEL UP!")
 
 
         #self.transitionVal = None

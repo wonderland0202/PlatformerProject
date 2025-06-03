@@ -133,7 +133,7 @@ def openGamePlay(level):
     global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\placeholderPlayer.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
+                             "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\playerwoj.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
@@ -145,7 +145,7 @@ def openGamePlay(level):
 
     while gameLoopRunning:
         if needBuild:
-            collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+            collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
             needBuild = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -212,7 +212,7 @@ def openGamePlay(level):
             if transition == "SCREENUP":
                 playerScreen += 1
                 playerCharacter.currScreen = playerScreen
-                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
                 needBuild = True
                 playerCharacter.origPos = playerCharacter.rect.center
                 gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
@@ -222,7 +222,7 @@ def openGamePlay(level):
                 if playerScreen > 1:
                     playerScreen -= 1
                     playerCharacter.currScreen = playerScreen
-                    collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                    collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
                     playerCharacter.origPos = playerCharacter.rect.center
                     gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
                 else:
@@ -234,7 +234,7 @@ def openGamePlay(level):
                 level += 1
                 playerScreen = 1
                 playerCharacter.currScreen = playerScreen
-                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter)
+                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
                 playerCharacter.origPos = playerCharacter.rect.center
                 gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
 
@@ -261,11 +261,11 @@ def openGamePlay(level):
 
 
 
-def buildLevel(level, screen, playerCharacter):
+def buildLevel(level, screen, playerCharacter, objectiveBlock):
     if level == 1:
         bgImage, levelData = levelOneData(screen, playerCharacter)
     elif level == 2:
-        bgImage, playerCharacter, levelData = levelTwoData(screen, playerCharacter)
+        bgImage, playerCharacter, levelData = levelTwoData(screen, playerCharacter, objectiveBlock)
 
     xValPixelated = 0
     yValPixelated = 0
@@ -331,9 +331,13 @@ def levelOneData(screen, playerCharacter):
     return bgLevel1Image, levelData
 
 
-def levelTwoData(screen, playerCharacter):
+def levelTwoData(screen, playerCharacter, objectiveBlock):
     playerCharacter.currLevel = 2
     playerCharacter.currScreen = screen
+    playerCharacter.rect.bottom = 7 * HEIGHT / 9
+    playerCharacter.scrUpDir = "left"
+    objectiveBlock.rect.bottom = playerCharacter.rect.bottom
+    objectiveBlock.rect.x = playerCharacter.rect.x - 1
     bgLevel2Image = pygame.image.load("Images\\Backgrounds\\l2bgph.png").convert_alpha()
     bgLevel2Image = pygame.transform.scale(bgLevel2Image, (WIDTH, HEIGHT))
     levelData = makeLevel("2", str(screen))
