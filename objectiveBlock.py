@@ -101,7 +101,9 @@ class objectiveBlock(pygame.sprite.Sprite):
             self.rect.center = self.origPos
 
         if self.rect.top < 0:
-            self.rect.top = 0
+            self.rect.bottom = -1
+            self.offScreen = True
 
-        if self.rect.left > 0 and self.rect.right < screenWidth - 0.1:
+
+        if self.rect.left > 0 and self.rect.right < screenWidth - 0.1 and self.rect.top >= 0:
             self.offScreen = False

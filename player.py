@@ -157,6 +157,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.top < 0:
             if objectiveBlock.offScreen:
                 self.transitionVal = "LEVELUP"
+                print("LEVEL UP!")
 
 
         #self.transitionVal = None

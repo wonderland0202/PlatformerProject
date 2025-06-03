@@ -265,7 +265,7 @@ def buildLevel(level, screen, playerCharacter):
     if level == 1:
         bgImage, levelData = levelOneData(screen, playerCharacter)
     elif level == 2:
-        bgImage, playerCharacter, levelData = levelTwoData(screen)
+        bgImage, playerCharacter, levelData = levelTwoData(screen, playerCharacter)
 
     xValPixelated = 0
     yValPixelated = 0
@@ -331,12 +331,10 @@ def levelOneData(screen, playerCharacter):
     return bgLevel1Image, levelData
 
 
-def levelTwoData(screen):
-    playerCharacter = Player(4 * WIDTH / 14, 7 * HEIGHT / 9, 100 / 3, 50,
-                             "Images\\Player\\placeholderPlayer.png", 15, 5, 50, 1, 30, 500, 0.9, 5)
+def levelTwoData(screen, playerCharacter):
     playerCharacter.currLevel = 2
     playerCharacter.currScreen = screen
-    bgLevel2Image = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()
+    bgLevel2Image = pygame.image.load("Images\\Backgrounds\\l2bgph.png").convert_alpha()
     bgLevel2Image = pygame.transform.scale(bgLevel2Image, (WIDTH, HEIGHT))
     levelData = makeLevel("2", str(screen))
     return bgLevel2Image, playerCharacter, levelData
