@@ -103,9 +103,15 @@ class Player(pygame.sprite.Sprite):
         self.x, self.y = self.rect.topleft
 
         if self.jumpPressed or self.jumpNum <= 0:
-            self.image = self.nojImg
+            if self.facingDir == "RIGHT":
+                self.image = self.nojImgR
+            elif self.facingDir == "LEFT":
+                self.image = self.nojImgL
         else:
-            self.image = self.jImg
+            if self.facingDir == "RIGHT":
+                self.image = self.jImgR
+            elif self.facingDir == "LEFT":
+                self.image = self.jImgL
 
     def move(self, keys):
         if keys[pygame.K_d]:
@@ -127,6 +133,10 @@ class Player(pygame.sprite.Sprite):
                 self.speedY = -self.jumpHeight
                 self.onGround = False
                 self.jumpNum -= 1
+                print("jumpNum reduced")
+            else:
+                print(f"jumpNum: {self.jumpNum}")
+                print(f"jumpPressed: {self.jumpPressed}")
             self.jumpPressed = True
 
         else:
