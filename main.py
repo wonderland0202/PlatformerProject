@@ -14,7 +14,7 @@ pygame.init()
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
 # screen size for debugging
-WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
+#WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Neon Lights")
 clock = pygame.time.Clock()
@@ -309,7 +309,7 @@ def buildLevel(level, screen, playerCharacter, objectiveBlock):
                 fanAir = collisionObject(x, airY, WIDTH / 14, HEIGHT / 9, f"Levels/Level{level}/LevelMakeup/FanAir.png", False, "fanAir")
                 fanAirGroup.add(fanAir)
                 gameTileGroup.add(fanAir)
-        newGameTile = collisionObject(x, y, WIDTH / 14, HEIGHT / 9, objectIdentity, collisionVal, char)
+        newGameTile = collisionObject(x, y, WIDTH / 14 + WIDTH / 70, HEIGHT / 9 + HEIGHT / 45, objectIdentity, collisionVal, char)
         gameTileGroup.add(newGameTile)
         if collisionVal:
             collisionObjects.add(newGameTile)

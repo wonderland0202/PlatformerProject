@@ -4,8 +4,8 @@ class collisionObject(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image, doCollision, letterValue):
         super().__init__()
 
-        self.x = x
-        self.y = y
+        self.x = x + width / 2
+        self.y = y + height / 2
 
         self.width = width
         self.height = height
@@ -15,7 +15,7 @@ class collisionObject(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect.center = (self.x, self.y)
 
         self.doCollision = doCollision
 

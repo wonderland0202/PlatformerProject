@@ -74,8 +74,8 @@ class Player(pygame.sprite.Sprite):
         if self.onGround:
             self.jumpNum = self.origJumpNum
 
-        if not self.onGround and self.jumpNum > 1:
-            self.jumpNum = 1
+        #if not self.onGround and self.jumpNum > 1:
+        #    self.jumpNum = 1
 
         # Horizontal movement
         self.rect.x += self.speed
@@ -94,6 +94,8 @@ class Player(pygame.sprite.Sprite):
         fanCollisions = pygame.sprite.spritecollide(self, fanAirGroup, False)
         if fanCollisions:
             self.speedY = -self.jumpHeight / 2  # Adjust push strength as desired
+            if self.jumpNum > 1:
+                self.jumpNum = 1
 
         if self.speed > 0:
             self.facingDir = "RIGHT"
@@ -102,7 +104,7 @@ class Player(pygame.sprite.Sprite):
 
         self.x, self.y = self.rect.topleft
 
-        if self.jumpPressed or self.jumpNum <= 0:
+        if self.jumpNum <= 0:
             if self.facingDir == "RIGHT":
                 self.image = self.nojImgR
             elif self.facingDir == "LEFT":
@@ -133,10 +135,6 @@ class Player(pygame.sprite.Sprite):
                 self.speedY = -self.jumpHeight
                 self.onGround = False
                 self.jumpNum -= 1
-                print("jumpNum reduced")
-            else:
-                print(f"jumpNum: {self.jumpNum}")
-                print(f"jumpPressed: {self.jumpPressed}")
             self.jumpPressed = True
 
         else:

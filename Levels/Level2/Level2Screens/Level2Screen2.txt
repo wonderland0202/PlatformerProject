@@ -1,9 +1,9 @@
-CCCCCCCCCCCCCCO
-              O
-              O
-              O
-              O
-              O
-          W   O
-          W   O
-FFFFFFFFFFFFFFO
+ICCCCCCCCCCCCCO
+Q             O
+Q             O
+Q             O
+Q             O
+Q             O
+Q        VM   O
+Q        WQ   O
+TFFFFFFFFNTFFFO
