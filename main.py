@@ -133,7 +133,7 @@ def openGamePlay(level):
     global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 4000, WIDTH / 400)
+                             "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 3500, WIDTH / 400)
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
