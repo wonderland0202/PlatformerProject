@@ -6,7 +6,7 @@ from menuButton import MenuButton
 from collisionObject import collisionObject
 from objectiveBlock import objectiveBlock
 from kickUp import kickUp
-from grappler import Grappler, GrapplerSegment
+from grappler import Grappler, GrapplerProjectile
 
 pygame.init()
 
@@ -26,6 +26,10 @@ needBuild = True
 prevT = None
 kickerExists = False
 grapplerExists = False
+rPressed = False
+grapProjEx = False
+grapBuild = False
+gravity = 0.25
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -130,19 +134,18 @@ def openStartScreen():
 
 
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists
+    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, grapProjEx, grapBuild, gravity
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, HEIGHT / 3500, WIDTH / 400)
+                             "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
-    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", playerCharacter.gravity, 5, 1)
+    gameObjectiveBlock = objectiveBlock(2 * WIDTH / 14 + playerCharacter.width, 7 * HEIGHT / 9, WIDTH / 28, WIDTH / 28, "Images\\ObjectiveBlock\\ObjectiveBlockPH.jpg", gravity, playerCharacter.height / 10, playerCharacter.width / 30)
 
     objectiveBlockGroup = pygame.sprite.Group(gameObjectiveBlock)
 
     gameLoopRunning = True
-
     while gameLoopRunning:
         if needBuild:
             collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
@@ -181,7 +184,7 @@ def openGamePlay(level):
         #---------------#
 
         if pygame.key.get_pressed()[pygame.K_UP] and not kickerExists:
-            facingDir = playerCharacter.facingDir
+            facingDir = playerCharacter.facingX
             if facingDir == "RIGHT":
                 kicker = kickUp(playerCharacter.rect.x + playerCharacter.width, playerCharacter.rect.y + playerCharacter.height, 4 * playerCharacter.width / 5, playerCharacter.height / 2, 10)
                 kickerExists = True
@@ -194,18 +197,29 @@ def openGamePlay(level):
         # ----------------#
         #  GRAPPLER CODE  #
         # ----------------#
-        if not grapplerExists:
-            grapplerList = []
-        if pygame.key.get_pressed()[pygame.K_RIGHT] and not grapplerExists:
-            trueFacingDir = playerCharacter.facingDir
-            grapplerLenHolder = Grappler(playerCharacter, gameTileGroup, objectiveBlockGroup)
-            for i in range(grapplerLenHolder.grapplerLen):
-                if i + 1 < grapplerLenHolder.grapplerLen:
-                    grapplerPart = GrapplerSegment("LINK", playerCharacter.rect.x, playerCharacter.rect.y, trueFacingDir, i)
-                else:
-                    grapplerPart = GrapplerSegment("END", playerCharacter.rect.x, playerCharacter.rect.y, trueFacingDir, i)
-                grapplerList.append(grapplerPart)
 
+
+        if pygame.key.get_pressed()[pygame.K_RIGHT]:
+            if not rPressed:
+                rPressed = True
+                if not playerCharacter.grappling:
+                    playerCharacter.setGrappleDir()
+                    grapProj = GrapplerProjectile(playerCharacter, collisionObjects, objectiveBlockGroup, playerCharacter.grapDir)
+                    grapProjEx = True
+                    playerCharacter.grappling = True
+                else:
+                    grapBuild = False
+                    playerCharacter.grappling = False
+        else:
+            rPressed = False
+
+        if grapProjEx:
+            grapProj.update()
+
+            if grapProj.collidedObj != "":
+                grapProj.kill()
+                grapProjEx = False
+                grapBuild = True
 
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
 
@@ -257,7 +271,10 @@ def openGamePlay(level):
                 kickerExists = False
                 kicker.kill()
 
-
+        if playerCharacter.grappling:
+            screen.blit(playerCharacter.image, (playerCharacter.rect.x + playerCharacter.grapDir[0], playerCharacter.rect.y + playerCharacter.grapDir[1]))
+        if grapProjEx:
+            screen.blit(grapProj.image, grapProj.rect)
         clock.tick(FPS)
         pygame.display.update()
 
@@ -370,7 +387,8 @@ def incrementScreen():
 
 
 def openPauseMenu():
-    global gameState, needBuild
+    global gameState, needBuild, grapProjEx
+    grapProjEx = False
     pauseMenuRunning = True
     pauseMenuIndex = 0
 

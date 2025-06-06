@@ -1,35 +1,57 @@
 import pygame.sprite
 
 class Grappler(pygame.sprite.Sprite):
-    def __init__(self, player, tileGroup, objectiveBlockGroup):
+    def __init__(self, GrapplerProjectile, maxLen):
         super().__init__()
-        self.grapplerLen = 1
-        collided = True
-        while not collided:
-            self.image = pygame.Surface((10, 20 * self.grapplerLen))
-            self.image.set_alpha(0)
-            self.rect = self.image.get_rect(center=player.rect.center)
+        self.grapProj = GrapplerProjectile
+        self.linkImg = "Images\\Player\\Grappler\\link.jpg"
+        self.endImg = "Images\\Player\\Grappler\\end.jpg"
+        self.width = self.grapProj.player.width / 2
+        self.height = self.grapProj.player.height / 2
+        self.x = self.grapProj.player.rect.centerx
+        self.y = self.grapProj.player.rect.centery
 
-            tileCollisions = pygame.sprite.spritecollide(self, tileGroup, False)
-            objectiveBlockCollisions = pygame.sprite.spritecollide(self, objectiveBlockGroup, False)
+        if self.grapProj.travelDist <= maxLen:
+            for i in range(len(self.grapProj.travelDist)):
+                if i < self.grapProj.travelDist:
+                    self.imageVal = self.linkImg
+                else:
+                    self.imageVal = self.endImg
+                self.image = pygame.transform.scale(pygame.image.load(self.imageVal).convert_alpha(), (self.width, self.height))
+                self.rect = self.image.get_rect(center=(self.x * i, self.y * i))
 
-            if len(tileCollisions) <= 0 and len(objectiveBlockCollisions) <= 0:
-                self.grapplerLen += 1
-            else:
-                collided = True
 
-class GrapplerSegment(pygame.sprite.Sprite):
-    def __init__(self, img, x, y, facingDir, linkNum):
+
+
+class GrapplerProjectile(pygame.sprite.Sprite):
+    def __init__(self, player, tileGroup, objectiveBlockGroup, moveList):
         super().__init__()
-        if facingDir == "RIGHT":
-            width = 10
-        elif facingDir == "LEFT":
-            width = -10
-        if img == "LINK":
-            self.image = pygame.image.load("Images\\Player\\Grappler\\link.jpg").convert_alpha()
-            self.image = pygame.transform.scale(self.image, (10, 20))
-            self.rect = self.image.get_rect(center=(x + (width * linkNum), y))
-        elif img == "END":
-            self.image = pygame.image.load("Images\\Player\\Grappler\\end.jpg").convert_alpha()
-            self.image = pygame.transform.scale(self.image, (20, 10))
-            self.rect = self.image.get_rect(center=(x + (width * linkNum), y))
+        self.player = player
+
+        self.image = pygame.Surface((10, 10))
+        self.image.fill((255,255,255))
+        #self.image.set_alpha(0)
+        self.rect = self.image.get_rect(center=(player.rect.centerx, player.rect.centery))
+
+        self.tileGroup = tileGroup
+
+        self.collidedObj = ""
+        self.objectiveBlockGroup = objectiveBlockGroup
+
+        self.travelDist = 0
+
+        self.moveList = moveList
+
+    def update(self):
+        if self.collidedObj == "":
+            self.rect.x += 5 * self.moveList[0]
+            self.rect.y += 5 * self.moveList[1]
+        self.doCollision()
+
+    def doCollision(self):
+        collisions = pygame.sprite.spritecollide(self, self.tileGroup, False)
+        if len(collisions) == 0:
+            self.travelDist += 1
+            self.collidedObj = ""
+        else:
+            self.collidedObj = collisions
