@@ -168,11 +168,7 @@ class Player(pygame.sprite.Sprite):
 
         return self.transitionVal
 
-    def facingDir(self):
-        return f"{self.facingX}{self.facingY or ''}"
-
     def setGrappleDir(self):
-        print("called")
         if not self.grappling:
             self.facingY = self.facingList[1]
             self.facingX = self.facingList[0]

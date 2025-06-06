@@ -14,7 +14,7 @@ pygame.init()
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
 # screen size for debugging
-#WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
+WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Neon Lights")
 clock = pygame.time.Clock()
@@ -28,7 +28,7 @@ kickerExists = False
 grapplerExists = False
 rPressed = False
 grapProjEx = False
-grapBuild = False
+grapEx = False
 gravity = 0.25
 
 # Player's current level and screen
@@ -134,7 +134,7 @@ def openStartScreen():
 
 
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, grapProjEx, grapBuild, gravity
+    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, grapProjEx, grapEx, gravity
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
                              "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
@@ -146,6 +146,7 @@ def openGamePlay(level):
     objectiveBlockGroup = pygame.sprite.Group(gameObjectiveBlock)
 
     gameLoopRunning = True
+    grapplerGroup = pygame.sprite.Group()
     while gameLoopRunning:
         if needBuild:
             collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
@@ -208,8 +209,9 @@ def openGamePlay(level):
                     grapProjEx = True
                     playerCharacter.grappling = True
                 else:
-                    grapBuild = False
+                    grapEx = False
                     playerCharacter.grappling = False
+                    grapplerGroup.empty()
         else:
             rPressed = False
 
@@ -217,9 +219,14 @@ def openGamePlay(level):
             grapProj.update()
 
             if grapProj.collidedObj != "":
+                if grapProj.travelDist <= 10:
+                    for i in range(grapProj.travelDist):
+                        playerGrappler = Grappler(grapProj, grapProj.moveList, i, playerCharacter.grapDir)
+                        grapplerGroup.add(playerGrappler)
+                    grapEx = True
                 grapProj.kill()
                 grapProjEx = False
-                grapBuild = True
+
 
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
 
@@ -256,6 +263,8 @@ def openGamePlay(level):
 
         prevT = transition
 
+        grapplerGroup.update([playerCharacter.rect.centerx, playerCharacter.rect.centery])
+
         screen.blit(bgImage, (0, 0))
         gameTileGroup.draw(screen)
         screen.blit(playerCharacter.image, playerCharacter.rect)
@@ -275,6 +284,11 @@ def openGamePlay(level):
             screen.blit(playerCharacter.image, (playerCharacter.rect.x + playerCharacter.grapDir[0], playerCharacter.rect.y + playerCharacter.grapDir[1]))
         if grapProjEx:
             screen.blit(grapProj.image, grapProj.rect)
+        elif grapEx:
+            try:
+                grapplerGroup.draw(screen)
+            except AttributeError:
+                None
         clock.tick(FPS)
         pygame.display.update()
 
