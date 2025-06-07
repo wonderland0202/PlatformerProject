@@ -29,7 +29,7 @@ grapplerExists = False
 rPressed = False
 grapProjEx = False
 grapEx = False
-gravity = 0.25
+gravity = 0.15
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -220,7 +220,7 @@ def openGamePlay(level):
 
             if grapProj.collidedObj != "":
                 if grapProj.travelDist <= 10:
-                    for i in range(grapProj.travelDist):
+                    for i in range(grapProj.travelDist + 1):
                         playerGrappler = Grappler(grapProj, grapProj.moveList, i, playerCharacter.grapDir)
                         grapplerGroup.add(playerGrappler)
                     grapEx = True
@@ -262,8 +262,6 @@ def openGamePlay(level):
                 gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
 
         prevT = transition
-
-        grapplerGroup.update([playerCharacter.rect.centerx, playerCharacter.rect.centery])
 
         screen.blit(bgImage, (0, 0))
         gameTileGroup.draw(screen)

@@ -35,17 +35,14 @@ class Grappler(pygame.sprite.Sprite):
 
 
 
-
-        if self.itteration < self.grapProj.travelDist - 1:
+        if self.itteration == 0:
+            self.imageVal = "Images\\Player\\Grappler\\empty.png"
+        elif self.itteration < self.grapProj.travelDist:
             self.imageVal = "Images\\Player\\Grappler\\link.jpg"
         else:
             self.imageVal = "Images\\Player\\Grappler\\end.jpg"
         self.image = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(self.imageVal).convert_alpha(), (self.width, self.height)), self.angle)
         self.rect = self.image.get_rect(center=(self.x + self.itteration * (self.direc[0]), self.y + self.itteration * (self.direc[1])))
-
-    def update(self, playerCoord):
-        self.rect.center = playerCoord[0] + self.itteration * (self.direc[0] * 5), playerCoord[1] + self.itteration * (self.direc[1] * 5)
-
 
 
 
