@@ -51,7 +51,7 @@ class Grappler(pygame.sprite.Sprite):
 
 
 class GrapplerProjectile(pygame.sprite.Sprite):
-    def __init__(self, player, tileGroup, objectiveBlockGroup, moveList, screenSizeList):
+    def __init__(self, player, tileGroup, objectiveBlockGroup, moveList, screenSizeList, maxDist):
         super().__init__()
         self.player = player
         self.screenList = screenSizeList
@@ -59,6 +59,7 @@ class GrapplerProjectile(pygame.sprite.Sprite):
         self.image.fill((255,255,255))
         self.image.set_alpha(0)
         self.rect = self.image.get_rect(center=(player.rect.centerx, player.rect.centery))
+        self.maxDist = maxDist
 
         self.tileGroup = tileGroup
 
@@ -74,6 +75,7 @@ class GrapplerProjectile(pygame.sprite.Sprite):
             self.rect.x += 2.5 * self.moveList[0]
             self.rect.y += 2.5 * self.moveList[1]
         self.doCollision()
+
     def doCollision(self):
         collisions = pygame.sprite.spritecollide(self, self.tileGroup, False)
         if len(collisions) == 0:
@@ -87,5 +89,5 @@ class GrapplerProjectile(pygame.sprite.Sprite):
             self.collidedObj = collisions
 
         if self.rect.x > self.screenList[0] or self.rect.x < 0 or self.rect.y > self.screenList[1] or self.rect.y < 0:
-            self.travelDist = 21
+            self.travelDist = self.maxDist + 1
             self.collidedObj = " "

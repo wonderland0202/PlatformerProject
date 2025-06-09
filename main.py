@@ -1,140 +1,76 @@
-import pygame
+# <editor-fold desc="Imports">
 import math
 
-from player import Player
-from menuButton import MenuButton
+import pygame
+
+# Class imports
 from collisionObject import collisionObject
-from objectiveBlock import objectiveBlock
-from kickUp import kickUp
 from grappler import Grappler, GrapplerProjectile
+from kickUp import kickUp
+from menuButton import MenuButton
+from objectiveBlock import objectiveBlock
+from player import Player
+
+# </editor-fold>
 
 pygame.init()
 
-# Global constants
+# <editor-fold desc="Game Settings">
+
+#Screen and window settings
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
-# screen size for debugging
-WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
+#Screen size for debugging:
+#WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Neon Lights")
+
+#Fps
 clock = pygame.time.Clock()
 FPS = 144
-gameState = "startScreen"
+
+#Font for on screen text (fps...)
 font = pygame.font.SysFont("Consolas", 24)
+
+# </editor-fold>
+
+# <editor-fold desc="Gameloop">
+gameState = "startScreen"
 running = True
-needBuild = True
+# </editor-fold>
+
+# <editor-fold desc="Gameplay Variables">
+
+#Used for screen transitions
 prevT = None
+
+#Grappler settings
+needBuild = True
 kickerExists = False
 grapplerExists = False
-rPressed = False
 grapProjEx = False
 grapEx = False
-gravity = 0.1
+grapProjCollObj = ""
+grapMaxDist = WIDTH / 50
 
-# Player's current level and screen
+gravity = 0.3
+
+#Button states
+rPressed = False
+lPressed = False
+# </editor-fold>
+
+# <editor-fold desc="Get Level and Screen Data">
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
     playerLevel = int(level.read())
 
 with open("Player-Data\\CurrentPlayerScreen.txt") as currScreen:
     playerScreen = int(currScreen.read())
+# </editor-fold>
 
-
-def openStartScreen():
-    global gameState, needBuild
-    startScreenRunning = True
-    mainMenuIndex = 1
-
-    titleImage = pygame.image.load("Images/TitleScreen/TitleImage.png").convert_alpha()
-    titleImage = pygame.transform.scale(titleImage, (WIDTH / 3, HEIGHT / 10))
-    titlePos = 0
-    titlePosMult = 1
-
-    # Buttons
-    mainMenuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5,
-                                    "Images\\Buttons\\placeholderButton.png",
-                                    "Images\\Buttons\\placeholderButton-Selected.png")
-    mainMenuLevelsButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7,
-                                  "Images\\Buttons\\placeholderButton.png",
-                                  "Images\\Buttons\\placeholderButton-Selected.png")
-    mainMenuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8,
-                                "Images\\Buttons\\placeholderButton.png",
-                                "Images\\Buttons\\placeholderButton-Selected.png")
-    mainMenuSettingsButton = MenuButton(12 * WIDTH / 13, HEIGHT / 13, WIDTH / 10, WIDTH / 10,
-                                    "Images\\Buttons\\placeholderButton.png",
-                                    "Images\\Buttons\\placeholderButton-Selected.png")
-
-    mainMenuContinueButton.highlight()
-    mainMenuButtonGroup = pygame.sprite.Group(mainMenuContinueButton, mainMenuLevelsButton, mainMenuQuitButton, mainMenuSettingsButton)
-    bgMenuImage = pygame.image.load("Images\\Backgrounds\\BGPH.png").convert_alpha()
-    bgMenuImage = pygame.transform.scale(bgMenuImage, (WIDTH, HEIGHT))
-
-
-    while startScreenRunning:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                gameState = "endGame"
-                startScreenRunning = False
-                continue
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
-                    gameState = "endGame"
-                    startScreenRunning = False
-                    continue
-                if event.key == pygame.K_DOWN:
-                    if mainMenuIndex == 0:
-                        mainMenuIndex += 1
-                        mainMenuSettingsButton.unhighlight()
-                        mainMenuContinueButton.highlight()
-                    elif mainMenuIndex == 1:
-                        mainMenuIndex += 1
-                        mainMenuContinueButton.unhighlight()
-                        mainMenuLevelsButton.highlight()
-                    elif mainMenuIndex == 2:
-                        mainMenuIndex += 1
-                        mainMenuLevelsButton.unhighlight()
-                        mainMenuQuitButton.highlight()
-                if event.key == pygame.K_UP:
-                    if mainMenuIndex == 3:
-                        mainMenuIndex -= 1
-                        mainMenuQuitButton.unhighlight()
-                        mainMenuLevelsButton.highlight()
-                    elif mainMenuIndex == 2:
-                        mainMenuIndex -= 1
-                        mainMenuLevelsButton.unhighlight()
-                        mainMenuContinueButton.highlight()
-                    elif mainMenuIndex == 1:
-                        mainMenuIndex -= 1
-                        mainMenuContinueButton.unhighlight()
-                        mainMenuSettingsButton.highlight()
-                if event.key == pygame.K_SPACE:
-                    if mainMenuIndex == 0:
-                        gameState = "settingsMenu"
-                    elif mainMenuIndex == 1:
-                        needBuild = True
-                        gameState = "gamePlay"
-                    elif mainMenuIndex == 2:
-                        gameState = "levelsMenu"
-                    elif mainMenuIndex == 3:
-                        gameState = "endGame"
-                    startScreenRunning = False
-                    continue
-
-        if titlePos >= 0.5:
-            titlePosMult = -1
-        elif titlePos <= -0.5:
-            titlePosMult = 1
-
-        titlePos += 0.02 * titlePosMult
-
-        screen.blit(bgMenuImage, (0, 0))
-        screen.blit(titleImage, ((WIDTH / 2 - (titleImage.get_width() / 2)), 10 * math.sin(titlePos) + (HEIGHT / 15)))
-        mainMenuButtonGroup.draw(screen)
-        clock.tick(FPS)
-        pygame.display.update()
-
-
+# <editor-fold desc="Gameplay Functions">
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, grapProjEx, grapEx, gravity
+    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, lPressed, grapProjEx, grapEx, gravity, grapProjCollObj, grapMaxDist
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
                              "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
@@ -210,23 +146,36 @@ def openGamePlay(level):
                 rPressed = True
                 if not playerCharacter.grappling:
                     playerCharacter.setGrappleDir()
-                    grapProj = GrapplerProjectile(playerCharacter, collisionObjects, objectiveBlockGroup, playerCharacter.grapDir, [WIDTH, HEIGHT])
+                    grapProj = GrapplerProjectile(playerCharacter, collisionObjects, objectiveBlockGroup, playerCharacter.grapDir, [WIDTH, HEIGHT], grapMaxDist)
                     grapProjEx = True
                     playerCharacter.grappling = True
                 else:
                     grapEx = False
                     playerCharacter.grappling = False
-                    if len(grapplerGroup.sprites())  > 0:
+                    if len(grapplerGroup.sprites()) > 0:
                         playerCharacter.pullToGrapEnd(grapplerGroup.sprites()[-1])
                     grapplerGroup.empty()
         else:
             rPressed = False
 
+        if pygame.key.get_pressed()[pygame.K_LEFT]:
+            if not lPressed:
+                lPressed = True
+                if playerCharacter.grappling:
+                    if str(grapProjCollObj) == "[<objectiveBlock Sprite(in 1 groups)>]":
+                        playerCharacter.pullObjToSelf(gameObjectiveBlock)
+                    grapEx = False
+                    playerCharacter.grappling = False
+                    grapplerGroup.empty()
+        else:
+            lPressed = False
+
         if grapProjEx:
             grapProj.update()
 
             if grapProj.collidedObj != "":
-                if grapProj.travelDist <= 20:
+                if grapProj.travelDist <= grapMaxDist:
+                    grapProjCollObj = grapProj.collidedObj
                     for i in range(grapProj.travelDist + 1):
                         playerGrappler = Grappler(grapProj, grapProj.moveList, i, playerCharacter.grapDir)
                         grapplerGroup.add(playerGrappler)
@@ -235,6 +184,11 @@ def openGamePlay(level):
                     playerCharacter.grappling = False
                 grapProj.kill()
                 grapProjEx = False
+            else:
+                if grapProj.travelDist > grapMaxDist:
+                    playerCharacter.grappling = False
+                    grapProj.kill()
+                    grapProjEx = False
 
 
         transition = playerCharacter.boundCheck(WIDTH, HEIGHT, gameObjectiveBlock)
@@ -300,7 +254,6 @@ def openGamePlay(level):
         pygame.display.update()
 
 
-
 def buildLevel(level, screen, playerCharacter, objectiveBlock):
     if level == 1:
         bgImage, levelData = levelOneData(screen, playerCharacter)
@@ -333,7 +286,8 @@ def buildLevel(level, screen, playerCharacter, objectiveBlock):
             "P": f"Levels/Level{level}/LevelMakeup/CeilingToWall-Up.png",
             "I": f"Levels/Level{level}/LevelMakeup/WallToCeiling-Up.png",
             "B": f"Levels/Level{level}/LevelMakeup/FacingUpFan.png",
-            "T": f"Levels/Level{level}/LevelMakeup/WallToFloor-Down.png"
+            "T": f"Levels/Level{level}/LevelMakeup/WallToFloor-Down.png",
+            "E": f"Levels/Level{level}/LevelMakeup/WallToCeiling-Down.png"
         }.get(char, "Levels/EmptyTile.png")
 
         if char == " " or char == "O":
@@ -365,7 +319,7 @@ def buildLevel(level, screen, playerCharacter, objectiveBlock):
 def levelOneData(screen, playerCharacter):
     playerCharacter.currLevel = 1
     playerCharacter.currScreen = screen
-    bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1bgph.png").convert_alpha()
+    bgLevel1Image = pygame.image.load("Images\\Backgrounds\\l1BG.png").convert_alpha()
     bgLevel1Image = pygame.transform.scale(bgLevel1Image, (WIDTH, HEIGHT))
     levelData = makeLevel("1", str(screen))
     return bgLevel1Image, levelData
@@ -384,11 +338,9 @@ def levelTwoData(screen, playerCharacter, objectiveBlock):
     return bgLevel2Image, playerCharacter, levelData
 
 
-
 def makeLevel(levelNum, screenNum):
     with open(f"Levels/Level{levelNum}/Level{levelNum}Screens/Level{levelNum}Screen{screenNum}.txt") as levelToLoad:
         return levelToLoad.read()
-
 
 
 def incrementLevel():
@@ -405,6 +357,101 @@ def incrementScreen():
         currScreen.seek(0)
         currScreen.write(str(screen + 1))
         currScreen.truncate()
+# </editor-fold>
+
+# <editor-fold desc="Menus">
+def openStartScreen():
+    global gameState, needBuild
+    startScreenRunning = True
+    mainMenuIndex = 1
+
+    titleImage = pygame.image.load("Images/TitleScreen/NEONLIGHTS.png").convert_alpha()
+    titleImage = pygame.transform.scale(titleImage, (WIDTH / 3, HEIGHT / 8))
+    titlePos = 0
+    titlePosMult = 1
+
+    # Buttons
+    mainMenuContinueButton = MenuButton(WIDTH / 2, HEIGHT / 3, WIDTH / 5, HEIGHT / 5,
+                                    "Images\\Buttons\\placeholderButton.png",
+                                    "Images\\Buttons\\placeholderButton-Selected.png")
+    mainMenuLevelsButton = MenuButton(WIDTH / 2, 7 * HEIGHT / 12, WIDTH / 7, HEIGHT / 7,
+                                  "Images\\Buttons\\placeholderButton.png",
+                                  "Images\\Buttons\\placeholderButton-Selected.png")
+    mainMenuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8,
+                                "Images\\Buttons\\placeholderButton.png",
+                                "Images\\Buttons\\placeholderButton-Selected.png")
+    mainMenuSettingsButton = MenuButton(12 * WIDTH / 13, HEIGHT / 13, WIDTH / 10, WIDTH / 10,
+                                    "Images\\Buttons\\placeholderButton.png",
+                                    "Images\\Buttons\\placeholderButton-Selected.png")
+
+    mainMenuContinueButton.highlight()
+    mainMenuButtonGroup = pygame.sprite.Group(mainMenuContinueButton, mainMenuLevelsButton, mainMenuQuitButton, mainMenuSettingsButton)
+    bgMenuImage = pygame.image.load("Images\\Backgrounds\\menuBG.png").convert_alpha()
+    bgMenuImage = pygame.transform.scale(bgMenuImage, (WIDTH, HEIGHT))
+
+
+    while startScreenRunning:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameState = "endGame"
+                startScreenRunning = False
+                continue
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    gameState = "endGame"
+                    startScreenRunning = False
+                    continue
+                if event.key == pygame.K_DOWN:
+                    if mainMenuIndex == 0:
+                        mainMenuIndex += 1
+                        mainMenuSettingsButton.unhighlight()
+                        mainMenuContinueButton.highlight()
+                    elif mainMenuIndex == 1:
+                        mainMenuIndex += 1
+                        mainMenuContinueButton.unhighlight()
+                        mainMenuLevelsButton.highlight()
+                    elif mainMenuIndex == 2:
+                        mainMenuIndex += 1
+                        mainMenuLevelsButton.unhighlight()
+                        mainMenuQuitButton.highlight()
+                if event.key == pygame.K_UP:
+                    if mainMenuIndex == 3:
+                        mainMenuIndex -= 1
+                        mainMenuQuitButton.unhighlight()
+                        mainMenuLevelsButton.highlight()
+                    elif mainMenuIndex == 2:
+                        mainMenuIndex -= 1
+                        mainMenuLevelsButton.unhighlight()
+                        mainMenuContinueButton.highlight()
+                    elif mainMenuIndex == 1:
+                        mainMenuIndex -= 1
+                        mainMenuContinueButton.unhighlight()
+                        mainMenuSettingsButton.highlight()
+                if event.key == pygame.K_SPACE:
+                    if mainMenuIndex == 0:
+                        gameState = "settingsMenu"
+                    elif mainMenuIndex == 1:
+                        needBuild = True
+                        gameState = "gamePlay"
+                    elif mainMenuIndex == 2:
+                        gameState = "levelsMenu"
+                    elif mainMenuIndex == 3:
+                        gameState = "endGame"
+                    startScreenRunning = False
+                    continue
+
+        if titlePos >= 1:
+            titlePosMult = -1
+        elif titlePos <= -1:
+            titlePosMult = 1
+
+        titlePos += 0.01 * titlePosMult
+
+        screen.blit(bgMenuImage, (0, 0))
+        screen.blit(titleImage, ((WIDTH / 2 - (titleImage.get_width() / 2)), 15 * titlePos + (HEIGHT / 15)))
+        mainMenuButtonGroup.draw(screen)
+        clock.tick(FPS)
+        pygame.display.update()
 
 
 def openPauseMenu():
@@ -464,8 +511,9 @@ def openLevelsMenu():
 
 def openSettingsMenu():
     print("Settings menu not implemented yet.")
+# </editor-fold>
 
-
+# <editor-fold desc="Full program loop">
 while running:
     if gameState == "startScreen":
         openStartScreen()
@@ -483,3 +531,4 @@ while running:
         running = False
 
 pygame.quit()
+# </editor-fold>

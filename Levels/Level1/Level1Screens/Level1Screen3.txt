@@ -1,9 +1,9 @@
-I            WO
-             WO
-             WO
-Q    VBFFFFFFNO
-Q    WAAAAAAAAO
-Q  VBNAAAAAAAAO
-Q  WAAAAAAAAAAO
-Q  WAAAAAAAAAAO
-TBFNAAAAAAAAAAO
+CCCCCCCAAAQ   O
+       WAAQ   O
+       ECCP   O
+M             O
+TM            O
+ATM        VFFO
+AAQ        WAAO
+AAQ        WAAO
+AAQ   VBBM WAAO

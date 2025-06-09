@@ -176,6 +176,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.top < 0 and objectiveBlock.offScreen:
             self.transitionVal = "LEVELUP"
 
+
         return self.transitionVal
 
     def setGrappleDir(self):
@@ -194,4 +195,23 @@ class Player(pygame.sprite.Sprite):
                 ]
 
     def pullToGrapEnd(self, endLink):
-        self.rect.center = endLink.rect.center
+        if self.rect.centerx < endLink.rect.centerx:
+            self.rect.centerx = endLink.rect.centerx - endLink.width
+        elif self.rect.centerx > endLink.rect.centerx:
+            self.rect.centerx = endLink.rect.centerx + endLink.width
+
+        if self.rect.centery < endLink.rect.centery:
+            self.rect.centery = endLink.rect.centery - endLink.height
+        elif self.rect.centery > endLink.rect.centery:
+            self.rect.centery = endLink.rect.centery + endLink.height
+
+    def pullObjToSelf(self, objBlock):
+        if objBlock.rect.centerx < self.rect.centerx:
+            objBlock.rect.centerx = self.rect.centerx - self.width
+        elif objBlock.rect.centerx > self.rect.centerx:
+            objBlock.rect.centerx = self.rect.centerx + self.width
+
+        if objBlock.rect.centery < self.rect.centery:
+            objBlock.rect.centery = self.rect.centery - self.height
+        elif objBlock.rect.centery > self.rect.centery:
+            objBlock.rect.centery = self.rect.centery + self.height
