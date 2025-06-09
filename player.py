@@ -55,17 +55,23 @@ class Player(pygame.sprite.Sprite):
             self.jumpNum = self.origJumpNum
 
         # Move and collide X
-        self.rect.x += self.speed
+        if not self.grappling:
+            self.rect.x += self.speed
         self.doCollision(tileGroup, axis="x")
 
+        if self.grappling:
+            self.speedY = 0
+
         # Apply gravity and collide Y
-        self.speedY += self.gravity
-        self.rect.y += self.speedY
+        if not self.grappling:
+            self.speedY += self.gravity
+            self.rect.y += self.speedY
         self.onGround = False
         self.doCollision(tileGroup, axis="y")
 
         # Handle input
-        self.move(keys)
+        if not self.grappling:
+            self.move(keys)
         self.boundCheck(screenWidth, screenHeight, objectiveBlock)
 
         # Fan effect
@@ -97,6 +103,12 @@ class Player(pygame.sprite.Sprite):
 
         self.x, self.y = self.rect.topleft
 
+
+    def reset(self):
+        self.rect.center = self.origPos
+        self.facingX = "LEFT" if self.currLevel % 2 == 0 else "RIGHT"
+        self.grappling = False
+
     def move(self, keys):
         self.speed = 0
         if keys[pygame.K_d]:
@@ -127,9 +139,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.rightPressed = False
 
-        if keys[pygame.K_r]:
-            self.rect.center = self.origPos
-            self.facingX = "LEFT" if self.currLevel % 2 == 0 else "RIGHT"
+
     def doCollision(self, tileGroup, axis):
         for collider in pygame.sprite.spritecollide(self, tileGroup, False):
             if axis == "x":
@@ -182,3 +192,6 @@ class Player(pygame.sprite.Sprite):
                     10 if self.facingX == "RIGHT" else -10 if self.facingX == "LEFT" else 0,
                     -10 if self.facingY == "UP" else 10 if self.facingY == "DOWN" else 0
                 ]
+
+    def pullToGrapEnd(self, endLink):
+        self.rect.center = endLink.rect.center

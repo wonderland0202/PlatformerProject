@@ -29,7 +29,7 @@ grapplerExists = False
 rPressed = False
 grapProjEx = False
 grapEx = False
-gravity = 0.15
+gravity = 0.1
 
 # Player's current level and screen
 with open("Player-Data\\CurrentPlayerLevel.txt") as level:
@@ -172,6 +172,11 @@ def openGamePlay(level):
                     gameState = "paused"
                     gameLoopRunning = False
                     continue
+                if event.key == pygame.K_r:
+                    playerCharacter.reset()
+                    gameObjectiveBlock.reset()
+                    grapplerGroup.empty()
+
 
         fps = int(clock.get_fps())
         fpsText = font.render(f"FPS: {fps}", True, (0, 0, 0))
@@ -205,12 +210,14 @@ def openGamePlay(level):
                 rPressed = True
                 if not playerCharacter.grappling:
                     playerCharacter.setGrappleDir()
-                    grapProj = GrapplerProjectile(playerCharacter, collisionObjects, objectiveBlockGroup, playerCharacter.grapDir)
+                    grapProj = GrapplerProjectile(playerCharacter, collisionObjects, objectiveBlockGroup, playerCharacter.grapDir, [WIDTH, HEIGHT])
                     grapProjEx = True
                     playerCharacter.grappling = True
                 else:
                     grapEx = False
                     playerCharacter.grappling = False
+                    if len(grapplerGroup.sprites())  > 0:
+                        playerCharacter.pullToGrapEnd(grapplerGroup.sprites()[-1])
                     grapplerGroup.empty()
         else:
             rPressed = False
@@ -219,11 +226,13 @@ def openGamePlay(level):
             grapProj.update()
 
             if grapProj.collidedObj != "":
-                if grapProj.travelDist <= 10:
+                if grapProj.travelDist <= 20:
                     for i in range(grapProj.travelDist + 1):
                         playerGrappler = Grappler(grapProj, grapProj.moveList, i, playerCharacter.grapDir)
                         grapplerGroup.add(playerGrappler)
                     grapEx = True
+                else:
+                    playerCharacter.grappling = False
                 grapProj.kill()
                 grapProjEx = False
 

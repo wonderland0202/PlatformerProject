@@ -42,18 +42,22 @@ class Grappler(pygame.sprite.Sprite):
         else:
             self.imageVal = "Images\\Player\\Grappler\\end.jpg"
         self.image = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(self.imageVal).convert_alpha(), (self.width, self.height)), self.angle)
-        self.rect = self.image.get_rect(center=(self.x + self.itteration * (self.direc[0]), self.y + self.itteration * (self.direc[1])))
+        self.rect = self.image.get_rect(center=(self.x + self.itteration * (self.direc[0] * 2.5), self.y + self.itteration * (self.direc[1] * 2.5)))
+
+    def update(self, playerCoord):
+        self.rect.center = playerCoord[0] + self.itteration * (self.direc[0] * 2.5), playerCoord[1] + self.itteration * (self.direc[1] * 2.5)
+
 
 
 
 class GrapplerProjectile(pygame.sprite.Sprite):
-    def __init__(self, player, tileGroup, objectiveBlockGroup, moveList):
+    def __init__(self, player, tileGroup, objectiveBlockGroup, moveList, screenSizeList):
         super().__init__()
         self.player = player
-
+        self.screenList = screenSizeList
         self.image = pygame.Surface((10, 10))
         self.image.fill((255,255,255))
-        #self.image.set_alpha(0)
+        self.image.set_alpha(0)
         self.rect = self.image.get_rect(center=(player.rect.centerx, player.rect.centery))
 
         self.tileGroup = tileGroup
@@ -67,14 +71,21 @@ class GrapplerProjectile(pygame.sprite.Sprite):
 
     def update(self):
         if self.collidedObj == "":
-            self.rect.x += 5 * self.moveList[0]
-            self.rect.y += 5 * self.moveList[1]
+            self.rect.x += 2.5 * self.moveList[0]
+            self.rect.y += 2.5 * self.moveList[1]
         self.doCollision()
-
     def doCollision(self):
         collisions = pygame.sprite.spritecollide(self, self.tileGroup, False)
         if len(collisions) == 0:
-            self.travelDist += 1
-            self.collidedObj = ""
+            collisions = pygame.sprite.spritecollide(self, self.objectiveBlockGroup, False)
+            if len(collisions) == 0:
+                self.travelDist += 1
+                self.collidedObj = ""
+            else:
+                self.collidedObj = collisions
         else:
             self.collidedObj = collisions
+
+        if self.rect.x > self.screenList[0] or self.rect.x < 0 or self.rect.y > self.screenList[1] or self.rect.y < 0:
+            self.travelDist = 21
+            self.collidedObj = " "

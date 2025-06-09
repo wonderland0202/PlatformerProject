@@ -31,9 +31,6 @@ class objectiveBlock(pygame.sprite.Sprite):
     def update(self, screenHeight, screenWidth, playerCharacter, tileGroup, fanAirGroup, playerGroup):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_r]:
-            self.rect.center = self.origPos
-
         if not self.offScreen:
 
             # Horizontal movement
@@ -56,6 +53,9 @@ class objectiveBlock(pygame.sprite.Sprite):
         self.boundCheck(screenWidth, screenHeight)
 
         self.x, self.y = self.rect.topleft
+
+    def reset(self):
+        self.rect.center = self.origPos
 
     def doGameTileCollision(self, tileGroup, axis):
         collisions = pygame.sprite.spritecollide(self, tileGroup, False)
