@@ -21,8 +21,8 @@ pygame.init()
 scrSize = pygame.display.Info()
 WIDTH, HEIGHT = scrSize.current_w, scrSize.current_h
 #Screen size for debugging:
-#WIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# aWIDTH, HEIGHT = WIDTH / 2, HEIGHT / 2
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE) #remove pygame.FULLSCREEN to pygame.RESIZABLE for testing
 pygame.display.set_caption("Neon Lights")
 
 #Fps
@@ -198,7 +198,11 @@ def openGamePlay(level):
             if transition == "SCREENUP":
                 playerScreen += 1
                 playerCharacter.currScreen = playerScreen
-                collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
+                try:
+                    collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
+                except FileNotFoundError:
+                    playerScreen -= 1
+                    playerCharacter.currScreen = playerScreen
                 needBuild = True
                 playerCharacter.origPos = playerCharacter.rect.center
                 gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
@@ -241,15 +245,13 @@ def openGamePlay(level):
                 kickerExists = False
                 kicker.kill()
 
-        if playerCharacter.grappling:
-            screen.blit(playerCharacter.image, (playerCharacter.rect.x + playerCharacter.grapDir[0], playerCharacter.rect.y + playerCharacter.grapDir[1]))
         if grapProjEx:
             screen.blit(grapProj.image, grapProj.rect)
         elif grapEx:
             try:
                 grapplerGroup.draw(screen)
             except AttributeError:
-                None
+                print("Attribute error")
         clock.tick(FPS)
         pygame.display.update()
 
@@ -275,19 +277,20 @@ def buildLevel(level, screen, playerCharacter, objectiveBlock):
 
         objectIdentity = {
             " ": f"Levels/EmptyTile.png",
-            "W": f"Levels/Level{level}/LevelMakeup/LeftWallLine.png",
-            "F": f"Levels/Level{level}/LevelMakeup/FloorLine.png",
-            "Q": f"Levels/Level{level}/LevelMakeup/RightWallLine.png",
-            "A": f"Levels/Level{level}/LevelMakeup/InnerBuilding.png",
-            "C": f"Levels/Level{level}/LevelMakeup/CeilingLine.png",
+            "W": f"Levels/Level{level}/LevelMakeup/LeftWall.png",
+            "F": f"Levels/Level{level}/LevelMakeup/Floor.png",
+            "Q": f"Levels/Level{level}/LevelMakeup/RightWall.png",
+            "A": f"Levels/Level{level}/LevelMakeup/InnerWall.png",
+            "C": f"Levels/Level{level}/LevelMakeup/Ceiling.png",
             "V": f"Levels/Level{level}/LevelMakeup/WallToFloor-Up.png",
             "M": f"Levels/Level{level}/LevelMakeup/FloorToWall-Down.png",
             "N": f"Levels/Level{level}/LevelMakeup/FloorToWall-Up.png",
             "P": f"Levels/Level{level}/LevelMakeup/CeilingToWall-Up.png",
             "I": f"Levels/Level{level}/LevelMakeup/WallToCeiling-Up.png",
-            "B": f"Levels/Level{level}/LevelMakeup/FacingUpFan.png",
+            "B": f"Levels/Level{level}/LevelMakeup/Fan.png",
             "T": f"Levels/Level{level}/LevelMakeup/WallToFloor-Down.png",
-            "E": f"Levels/Level{level}/LevelMakeup/WallToCeiling-Down.png"
+            "E": f"Levels/Level{level}/LevelMakeup/WallToCeiling-Down.png",
+            "K": f"Levels/Level{level}/LevelMakeup/CeilingToWall-Down.png"
         }.get(char, "Levels/EmptyTile.png")
 
         if char == " " or char == "O":
@@ -302,6 +305,7 @@ def buildLevel(level, screen, playerCharacter, objectiveBlock):
                 fanAirGroup.add(fanAir)
                 gameTileGroup.add(fanAir)
         newGameTile = collisionObject(x, y, WIDTH / 14 + WIDTH / 70, HEIGHT / 9 + HEIGHT / 45, objectIdentity, collisionVal, char)
+        newGameTile = collisionObject(x, y, WIDTH / 13, HEIGHT / 8, objectIdentity, collisionVal, char)
         gameTileGroup.add(newGameTile)
         if collisionVal:
             collisionObjects.add(newGameTile)
@@ -332,7 +336,7 @@ def levelTwoData(screen, playerCharacter, objectiveBlock):
     playerCharacter.scrUpDir = "left"
     objectiveBlock.rect.bottom = playerCharacter.rect.bottom
     objectiveBlock.rect.x = playerCharacter.rect.x - 1
-    bgLevel2Image = pygame.image.load("Images\\Backgrounds\\l2bgph.png").convert_alpha()
+    bgLevel2Image = pygame.image.load("Images\\Backgrounds\\l2BG.png").convert_alpha()
     bgLevel2Image = pygame.transform.scale(bgLevel2Image, (WIDTH, HEIGHT))
     levelData = makeLevel("2", str(screen))
     return bgLevel2Image, playerCharacter, levelData
@@ -380,7 +384,7 @@ def openStartScreen():
     mainMenuQuitButton = MenuButton(WIDTH / 2, 9 * HEIGHT / 12, WIDTH / 8, HEIGHT / 8,
                                 "Images\\Buttons\\placeholderButton.png",
                                 "Images\\Buttons\\placeholderButton-Selected.png")
-    mainMenuSettingsButton = MenuButton(12 * WIDTH / 13, HEIGHT / 13, WIDTH / 10, WIDTH / 10,
+    mainMenuSettingsButton = MenuButton(12 * WIDTH / 13, 2 * HEIGHT / 13, WIDTH / 10, WIDTH / 10,
                                     "Images\\Buttons\\placeholderButton.png",
                                     "Images\\Buttons\\placeholderButton-Selected.png")
 

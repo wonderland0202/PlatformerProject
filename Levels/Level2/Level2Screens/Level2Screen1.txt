@@ -1,9 +1,9 @@
-CCCCCCCCCCCCCCO
-              O
-              O
-              O
-              O
-              O
-              O
-              O
-FFFFFFFFFFFFFFO
+CCCCCCCCCCCCCWO
+             WO
+             WO
+             WO
+             WO
+             WO
+             WO
+             WO
+FFFFFFFFFFFFFNO

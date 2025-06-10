@@ -1,9 +1,9 @@
-CCCCCCCAAAQ   O
-       WAAQ   O
-       ECCP   O
-M             O
-TM            O
-ATM        VFFO
+CCCCCCCKAAQ  WO
+       WAAQ  WO
+       ECCP  WO
+M            WO
+TM           WO
+ATM        VFNO
 AAQ        WAAO
 AAQ        WAAO
 AAQ   VBBM WAAO
