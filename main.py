@@ -1,6 +1,6 @@
 # <editor-fold desc="Imports">
 import math
-
+import random
 import pygame
 
 # Class imports
@@ -70,10 +70,10 @@ with open("Player-Data\\CurrentPlayerScreen.txt") as currScreen:
 
 # <editor-fold desc="Gameplay Functions">
 def openGamePlay(level):
-    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, lPressed, grapProjEx, grapEx, gravity, grapProjCollObj, grapMaxDist
+    global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, lPressed, grapProjEx, grapEx, gravity, grapProjCollObj, grapMaxDist, image
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\placeholderPlayer-right.png", "Images\\Player\\placeholderPlayer-left.png","Images\\Player\\playerwoj-right.png", "Images\\Player\\playerwoj-left.png", HEIGHT / 100, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
+                             "Images\\Player\\PlayerRight.png", "Images\\Player\\PlayerLeft.png","Images\\Player\\PlayerRightInv.png", "Images\\Player\\PlayerLeftInv.png", HEIGHT / 100, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
@@ -252,6 +252,7 @@ def openGamePlay(level):
                 grapplerGroup.draw(screen)
             except AttributeError:
                 print("Attribute error")
+
         clock.tick(FPS)
         pygame.display.update()
 

@@ -3,7 +3,7 @@ CCCCCCCKAAQ  WO
        ECCP  WO
 M            WO
 TM           WO
-ATM        VFNO
+ATM        VBNO
 AAQ        WAAO
 AAQ        WAAO
 AAQ   VBBM WAAO
