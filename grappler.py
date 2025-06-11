@@ -35,7 +35,7 @@ class Grappler(pygame.sprite.Sprite):
 
 
 
-        if self.itteration == 0:
+        if self.itteration <= 1:
             self.imageVal = "Images\\Player\\Grappler\\empty.png"
         elif self.itteration < self.grapProj.travelDist:
             self.imageVal = "Images\\Player\\Grappler\\linkk.png"
