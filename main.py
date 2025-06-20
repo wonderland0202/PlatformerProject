@@ -73,7 +73,7 @@ def openGamePlay(level):
     global gameState, playerScreen, needBuild, prevT, kickerExists, grapplerExists, rPressed, lPressed, grapProjEx, grapEx, gravity, grapProjCollObj, grapMaxDist, image
 
     playerCharacter = Player(2 * WIDTH / 14, 7 * HEIGHT / 9, WIDTH / 28, HEIGHT / 14,
-                             "Images\\Player\\PlayerRight.png", "Images\\Player\\PlayerLeft.png","Images\\Player\\PlayerRightInv.png", "Images\\Player\\PlayerLeftInv.png", HEIGHT / 100, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
+                             "Images\\Player\\PlayerRight.png", "Images\\Player\\PlayerLeft.png","Images\\Player\\PlayerRightInv.png", "Images\\Player\\PlayerLeftInv.png", HEIGHT / 125, 2, WIDTH / 200, 500, gravity, WIDTH / 400)
 
     playerGroup = pygame.sprite.Group(playerCharacter)
 
@@ -200,6 +200,7 @@ def openGamePlay(level):
                 playerCharacter.currScreen = playerScreen
                 try:
                     collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
+                    incrementScreen()
                 except FileNotFoundError:
                     playerScreen -= 1
                     playerCharacter.currScreen = playerScreen
@@ -208,9 +209,11 @@ def openGamePlay(level):
                 gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
                 playerCharacter.transitionVal = None
 
+
             elif transition == "SCREENDOWN":
                 if playerScreen > 1:
                     playerScreen -= 1
+                    deIncrementScreen(1)
                     playerCharacter.currScreen = playerScreen
                     collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
                     playerCharacter.origPos = playerCharacter.rect.center
@@ -222,11 +225,14 @@ def openGamePlay(level):
 
             elif transition == "LEVELUP":
                 level += 1
+                deIncrementScreen(playerScreen - 1)
                 playerScreen = 1
                 playerCharacter.currScreen = playerScreen
                 collisionObjects, fanAirGroup, bgImage, gameTileGroup = buildLevel(level, playerScreen, playerCharacter, gameObjectiveBlock)
                 playerCharacter.origPos = playerCharacter.rect.center
                 gameObjectiveBlock.origPos = gameObjectiveBlock.rect.center
+                incrementLevel()
+
 
         prevT = transition
 
@@ -361,6 +367,13 @@ def incrementScreen():
         screen = int(currScreen.read())
         currScreen.seek(0)
         currScreen.write(str(screen + 1))
+        currScreen.truncate()
+
+def deIncrementScreen(amount):
+    with open("Player-Data\\CurrentPlayerScreen.txt", "r+") as currScreen:
+        screen = int(currScreen.read())
+        currScreen.seek(0)
+        currScreen.write(str(screen - amount))
         currScreen.truncate()
 # </editor-fold>
 
